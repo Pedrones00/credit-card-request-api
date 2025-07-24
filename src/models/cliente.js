@@ -30,6 +30,12 @@ export default (sequelize) => {
             cpf_regular: {
                 type: DataTypes.BOOLEAN,
                 allowNull: false,
+                defaultValue: true,
+            },
+            cliente_ativo: {
+                type: DataTypes.BOOLEAN,
+                allowNull: false,
+                defaultValue: true,
             }
 
         },

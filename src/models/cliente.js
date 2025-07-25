@@ -17,6 +17,7 @@ export default (sequelize) => {
             },
             cpf: {
                 type: DataTypes.STRING(11),
+                unique: true,
                 allowNull: false,
             },
             email: {

@@ -34,6 +34,7 @@ export default (sequelize) => {
             dt_fim_vigencia: {
                 type: DataTypes.DATEONLY,
                 allowNull: false,
+                defaultValue: '9999-12-31',
             }
 
         },

@@ -1,6 +1,8 @@
 class ClienteController {
-    constructor(ClienteModel) {
+    constructor(ClienteModel, CartaoModel, ContratoModel) {
         this.Cliente = ClienteModel;
+        this.Cartao = CartaoModel;
+        this.Contrato = ContratoModel;
     }
 
     async #validateInputs (request, response) {
@@ -92,7 +94,14 @@ class ClienteController {
     async searchID(request, response) {
         try {
             const id = request.params.id;
-            const cliente = await this.Cliente.findByPk(id)
+            const details = request.query.details;
+
+            const cliente = await this.Cliente.findByPk(id, {
+                include: details === 'true' ? 
+                    [{model: this.Contrato},] :
+                    [],
+            }
+            );
 
             if (!cliente) {
                 return response.status(404).json({error: 'Cliente não encontrado'})

@@ -32,10 +32,16 @@ export default (sequelize) => {
             dt_inicio_vigencia: {
                 type: DataTypes.DATEONLY,
                 allowNull: false,
+                defaultValue: () => {
+                    let today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    return today;
+                },
             },
             dt_fim_vigencia: {
                 type: DataTypes.DATEONLY,
                 allowNull: false,
+                defaultValue: '9999-12-31',
             },
 
         },

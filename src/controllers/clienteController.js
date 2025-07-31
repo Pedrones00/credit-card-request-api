@@ -44,13 +44,21 @@ class ClienteController {
     async listAll(request, response) {
         try {
             let clienteState = true;
+            const cpfCliente = request.query.cpf;
+            const details = request.query.details;
 
             if (request.query.ativo === 'false') {
                 clienteState = false
             }
 
             const clientes = await this.Cliente.findAll({
-                where: {cliente_ativo: clienteState}
+                where: {
+                    cliente_ativo: clienteState,
+                    ...(cpfCliente ? {cpf: cpfCliente} : {}) 
+                },
+                include: details === 'true' ?
+                    [{model: this.Contrato}, ] :
+                    []
             });
             response.status(200).json(clientes);
 
@@ -75,7 +83,7 @@ class ClienteController {
             }
 
             if (request.body.cpf_regular === false) {
-                return response.status(409).json({
+                return response.status(403).json({
                     error: 'Usuário com cpf irregular, cadastro não efetuado.'
                 });
             }
@@ -108,24 +116,6 @@ class ClienteController {
             }
 
             return response.status(200).json(cliente);
-
-        } catch (error) {
-            response.status(500).json({error: error.message});
-        }
-    }
-
-    async searchCPF(request, response) {
-        try {
-            const cpfCliente = request.params.cpf;
-            const cliente = await this.Cliente.findOne({
-                where: {cpf: cpfCliente}
-            });
-
-            if (!cliente) {
-                return response.status(404).json({error: 'Cliente não encontrado'})
-            }
-
-            response.status(200).json(cliente);
 
         } catch (error) {
             response.status(500).json({error: error.message});

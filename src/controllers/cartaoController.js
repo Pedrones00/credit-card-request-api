@@ -6,8 +6,7 @@ class CartaoController {
     }
 
     async #getActiveCards() {
-        let today = new Date();
-        today.setHours(0, 0, 0, 0);
+        let today = new Date().toISOString();
 
         const cartoes = await this.Cartao.findAll({
             where: {
@@ -23,8 +22,7 @@ class CartaoController {
     }
 
     async #getDeactiveCards() {
-        let today = new Date();
-        today.setHours(0, 0, 0, 0);
+        let today = new Date().toISOString();
 
         const cartoes = await this.Cartao.findAll({
             where: {
@@ -125,8 +123,7 @@ class CartaoController {
 
     async deleteCartao(request, response) {
         try {
-            let today = new Date();
-            today.setHours(0 ,0, 0, 0);
+            let today = new Date().toISOString();
 
             const cartao = await this.Cartao.findByPk(request.params.id);
             if (!cartao) {

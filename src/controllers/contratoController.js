@@ -8,9 +8,7 @@ class ContratoController {
     }
 
     #getToday(){
-        let today = new Date();
-        today.setHours(0, 0, 0, 0);
-
+        let today = new Date().toISOString();
         return today;
     }
 
@@ -48,9 +46,7 @@ class ContratoController {
         
         const cliente = await this.Cliente.findByPk(id_cliente);
 
-        if (!cliente) {
-            return false;
-        } else if (!cliente.cliente_ativo) {
+        if (!cliente || !cliente.cliente_ativo) {
             return false;
         }
 
@@ -66,8 +62,11 @@ class ContratoController {
         }
 
         const today = this.#getToday();
-        const dt_inicio_vigencia = new Date(cartao.dt_inicio_vigencia);
-        const dt_fim_vigencia = new Date(cartao.dt_fim_vigencia);
+        const dt_inicio_vigencia = new Date(cartao.dt_inicio_vigencia).toISOString();
+        const dt_fim_vigencia = new Date(cartao.dt_fim_vigencia).toISOString();
+
+        console.log(today, dt_inicio_vigencia, dt_fim_vigencia);
+        console.log(cartao);
         
         if (dt_inicio_vigencia > today || dt_fim_vigencia < today) {
             return false;
@@ -164,7 +163,7 @@ class ContratoController {
                 const isValidCartao = await this.#validateCartao(id_cartao);
                 if (!isValidCartao) {
                     response.status(400).json({error : "Cartão inválido."});
-                    return
+                    return;
                 }
             }
 
@@ -198,7 +197,7 @@ class ContratoController {
             }
             
             const today = this.#getToday();
-            const dateEndContrato = new Date(contrato.dt_fim_vigencia);
+            const dateEndContrato = new Date(contrato.dt_fim_vigencia).toISOString();
 
             if (dateEndContrato <= today) {
                 response.status(400).json({error : 'Contrato já está desativado.'});

@@ -24,12 +24,22 @@ app.listen(8000, function () {
 
 // Rota para a página inicial
 app.get("/", (request, response) => {
-  response.render("index", { title: "Home" });
+  response.render("cartoes");
+});
+
+// Rota para visualizar todos os cartões salvos
+app.get("/cartoes", (request, response) => {
+  response.render("cartoes");
+});
+
+// Rota para criar um novo cartão
+app.get("/cartao/criar", (request, response) => {
+  response.render("criar_cartao");
 });
 
 // Middleware para rotas não encontradas (404)
 app.use((req, res) => {
-  res.status(404).render("404", { title: "Página não encontrada" });
+  res.status(404).render("404");
 });
 
 /*

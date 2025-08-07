@@ -37,6 +37,16 @@ app.get("/cartao/criar", (request, response) => {
   response.render("criar_cartao");
 });
 
+// Rota para visualizar um novo cartão
+app.get("/cartao/visualizar", (request, response) => {
+  response.render("visualizar_cartao");
+});
+
+// Rota para editar um novo cartão
+app.get("/cartao/editar", (request, response) => {
+  response.render("editar_cartao");
+});
+
 // Middleware para rotas não encontradas (404)
 app.use((req, res) => {
   res.status(404).render("404");

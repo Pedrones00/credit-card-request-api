@@ -6,7 +6,7 @@ import ContratoController from './contratoController.js';
 const setupControllers = async () => {
         const {Cliente, Cartao, Contrato, dbconnection} = await initModel();
         const clienteController = new ClienteController(Cliente, Cartao, Contrato);
-        const cartaoController = new CartaoController(Cartao);
+        const cartaoController = new CartaoController(Cartao, Contrato);
         const contratoController = new ContratoController(Contrato, Cliente, Cartao);
 
         return {

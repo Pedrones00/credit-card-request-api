@@ -1,8 +1,9 @@
 import { Op } from 'sequelize';
 
 class CartaoController {
-    constructor(CartaoModel) {
+    constructor(CartaoModel, ContratoModel) {
         this.Cartao = CartaoModel;
+        this.Contrato = ContratoModel;
     }
 
     async #getActiveCards() {
@@ -42,6 +43,25 @@ class CartaoController {
             }
         });
         return cartoes;
+    }
+
+    async #disableContratos(id_cartao) {
+
+        let today = new Date().toISOString();
+        
+        const contratos_ativos = await this.Contrato.findAll({
+            where: {
+                id_cartao: id_cartao,
+                dt_fim_vigencia : {[Op.gte]:today}
+            }
+        });
+
+        for (const contrato of contratos_ativos) {
+            contrato.dt_fim_vigencia = today;
+            await contrato.save();
+        }
+
+        return contratos_ativos;
     }
 
     async #validateInputs(request, response) {
@@ -132,10 +152,13 @@ class CartaoController {
 
             await cartao.update({dt_fim_vigencia: today});
 
+            const contratos_desativados = await this.#disableContratos(cartao.id_cartao);
+
             response.status(200).json({
-                message: "Cartão estará desabilitado a partir de amanhã.",
+                message: "O cartão e seus contratos estarão desabilitado a partir de amanhã.",
                 cartao,
-            })
+                contratos_desativados
+            });
 
         } catch (error) {
             response.status(500).json({ error: error.message });

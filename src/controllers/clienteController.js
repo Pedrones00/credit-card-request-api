@@ -1,3 +1,5 @@
+import { Op } from 'sequelize';
+
 class ClienteController {
     constructor(ClienteModel, CartaoModel, ContratoModel) {
         this.Cliente = ClienteModel;
@@ -40,6 +42,25 @@ class ClienteController {
 
         return true;
     }
+
+    async #disableContratos(id_cliente) {
+    
+            let today = new Date().toISOString();
+            
+            const contratos_ativos = await this.Contrato.findAll({
+                where: {
+                    id_cliente: id_cliente,
+                    dt_fim_vigencia : {[Op.gte]:today}
+                }
+            });
+    
+            for (const contrato of contratos_ativos) {
+                contrato.dt_fim_vigencia = today;
+                await contrato.save();
+            }
+    
+            return contratos_ativos;
+        }
 
     async listAll(request, response) {
         try {
@@ -159,7 +180,12 @@ class ClienteController {
 
             await cliente.update({cliente_ativo: false});
 
-            response.status(200).json({message: 'Cliente desativado com sucesso'});
+            const contratos_desativados = await this.#disableContratos(cliente.id_cliente);
+
+            response.status(200).json({
+                message: 'Cliente e contratos atrelados desativados com sucesso',
+                contratos_desativados
+            });
             
         } catch (error) {
             response.status(500).json({error: error.message});

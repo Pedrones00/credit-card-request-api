@@ -11,6 +11,14 @@ Para desenvolver esse sistema utilizamos as seguintes tecnologias:
 
 ## Como instalar
 
+```bash
+    npm install
+```
+
 ## Como executar
+
+```bash
+    npm run dev
+```
 
 ## Documentação da API

@@ -23,6 +23,17 @@ app.listen(8000, function () {
 });
 
 // Simulação de um banco de dados
+const clientes = [
+  {
+    id_cliente: 1,
+    nome: "João da Silva",
+    cpf: "123.456.789-00",
+    email: "email@dominio.com",
+    dt_nascimento: "1990-01-01",
+    cpf_regular: 1, // 1 se o CPF estiver regular, 0 se irregular
+    cliente_ativo: 1, // 1 se o cliente estiver ativo, 0 se inativo
+  },
+];
 const cartoes = [
   {
     id_cartao: 1,
@@ -58,6 +69,15 @@ app.get("/cartoes", (request, response) => {
     titulo: "Cartões",
     alerta: false,
     cartoes,
+  });
+});
+
+// Rota para visualizar todos os clientes salvos
+app.get("/clientes", (request, response) => {
+  response.render("clientes", {
+    titulo: "Clientes",
+    alerta: false,
+    clientes,
   });
 });
 

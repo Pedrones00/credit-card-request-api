@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
+    <title>Clientes</title>
+    <link href="/output.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
+    <script type="module">
+        // Quando a página for carregada, adiciona o evento de clique ao botão "Deletar"
+        document.addEventListener('DOMContentLoaded', function () {
+            // Seleciona o botão "Deletar" e o elemento de diálogo
+            const botoes_deletar = document.getElementsByClassName('deletar');
+            const dialog = document.getElementById('dialog');
+            const confirmar_deletar = document.getElementById('confirmar_deletar');
+
+            for (let botao_deletar of botoes_deletar) {
+                // Quando o botão "Deletar" for clicado, mostra o diálogo
+                botao_deletar.addEventListener('click', function (e) {
+                    e.preventDefault();
+
+                    // Define o ID do cartão a ser deletado no diálogo
+                    confirmar_deletar.setAttribute('href', '/clientes/deletar/' + this.id);
+
+                    // Abre o diálogo
+                    dialog.show();
+                });
+            }
+
+            // Seleciona o botão de fechar alerta
+            const fechar_alerta = document.querySelector('#alert button');
+
+            // Quando o botão de fechar alerta for clicado, esconde o alerta
+            fechar_alerta.addEventListener('click', function () {
+                const alerta = document.getElementById('alert');
+                alerta.classList.toggle('hidden'); // Esconde o alerta
+            });
+        });
+    </script>
+</head>
+
+
+<body class="h-full bg-gray-50 dark:bg-gray-900">
+
+    <%- include('partials/header') %>
+
+        <main class="py-10 lg:pl-72">
+            <!-- Container -->
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-7xl">
+                    <!-- Alerta de exclusão -->
+                    <div class="rounded-md shadow-sm bg-green-100 p-4 fixed top-5 translate-x-1/2 right-1/2 lg:translate-x-0 lg:right-5 z-50 w-11/12 max-w-max <%= alerta ? '' : 'hidden' %>" role="alert" id="alert">
+                        <div class="flex">
+                            <div class="shrink-0">
+                                <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 text-green-400">
+                                    <path d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" fill-rule="evenodd" />
+                                </svg>
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-green-800">Cartão deletado!</p>
+                            </div>
+                            <div class="ml-auto pl-3">
+                                <div class="-mx-1.5 -my-1.5">
+                                    <button type="button" class="inline-flex rounded-md bg-green-50 p-1.5 text-green-500 hover:bg-green-100 focus-visible:ring-2 focus-visible:ring-green-600 focus-visible:ring-offset-2 focus-visible:ring-offset-green-50 focus-visible:outline-hidden">
+                                        <span class="sr-only">Fechar</span>
+                                        <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5">
+                                            <path d="M6.28 5.22a.75.75 0 0 0-1.06 1.06L8.94 10l-3.72 3.72a.75.75 0 1 0 1.06 1.06L10 11.06l3.72 3.72a.75.75 0 1 0 1.06-1.06L11.06 10l3.72-3.72a.75.75 0 0 0-1.06-1.06L10 8.94 6.28 5.22Z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h2 class="font-medium text-xl text-gray-500 dark:text-gray-400">Clientes cadastrados</h2>
+                    <!-- Cards -->
+                    <ul role="list" class="grid grid-cols-1 gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 mt-3">
+                        <!-- Card item -->
+                        <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow-sm dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:outline dark:-outline-offset-1 dark:outline-white/10">
+                            <div class="flex flex-1 flex-col p-8">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mx-auto size-32 shrink-0 rounded-full bg-gray-200 text-indigo-600 dark:text-indigo-700 outline -outline-offset-1 outline-black/5 dark:bg-gray-300 dark:outline-white/10">
+                                    <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd" />
+                                </svg>
+                                <h3 class="mt-6 text-sm font-medium text-gray-900 dark:text-white">
+                                    <span class="text-indigo-500 dark:text-indigo-400 mr-1">#1
+                                    </span>
+                                    Nome
+                                </h3>
+                                <div class="mt-1 flex grow flex-col justify-between">
+                                    <div>
+                                        <span class="sr-only">CPF</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">123.456.789-00</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-500 rounded-full inline-block ml-1">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <span class="sr-only">Data de nascimento</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">31/12/1999</span>
+                                    </div>
+                                    <div class="mt-3">
+                                        <span class="sr-only">Status</span>
+                                        <span>
+                                            <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 inset-ring inset-ring-green-600/20 dark:bg-green-500/10 dark:text-green-500 dark:inset-ring-green-500/10">Ativo</span>
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div>
+                                <div class="-mt-px flex divide-x divide-gray-200 dark:divide-white/10">
+                                    <div class="flex w-0 flex-1">
+                                        <a href="mailto:janecooper@example.com" class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                                            <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 text-gray-400 dark:text-gray-500">
+                                                <path d="M3 4a2 2 0 0 0-2 2v1.161l8.441 4.221a1.25 1.25 0 0 0 1.118 0L19 7.162V6a2 2 0 0 0-2-2H3Z" />
+                                                <path d="m19 8.839-7.77 3.885a2.75 2.75 0 0 1-2.46 0L1 8.839V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.839Z" />
+                                            </svg>
+                                            Email
+                                        </a>
+                                    </div>
+                                    <div class="-ml-px flex w-0 flex-1">
+                                        <a href="tel:+1-202-555-0170" class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-5 text-gray-400 dark:text-gray-500">
+                                                <path d="M2 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM6.5 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM12.5 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+                                            </svg>
+                                            Opções
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <!-- Card item -->
+                        <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow-sm dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:outline dark:-outline-offset-1 dark:outline-white/10">
+                            <div class="flex flex-1 flex-col p-8">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mx-auto size-32 shrink-0 rounded-full bg-gray-200 text-indigo-600 dark:text-indigo-700 outline -outline-offset-1 outline-black/5 dark:bg-gray-300 dark:outline-white/10">
+                                    <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd" />
+                                </svg>
+                                <h3 class="mt-6 text-sm font-medium text-gray-900 dark:text-white">
+                                    <span class="text-indigo-500 dark:text-indigo-400 mr-1">#1
+                                    </span>
+                                    Nome
+                                </h3>
+                                <div class="mt-1 flex grow flex-col justify-between">
+                                    <div>
+                                        <span class="sr-only">CPF</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">123.456.789-00</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-500 rounded-full inline-block ml-1">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <span class="sr-only">Data de nascimento</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">31/12/1999</span>
+                                    </div>
+                                    <div class="mt-3">
+                                        <span class="sr-only">Status</span>
+                                        <span>
+                                            <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 inset-ring inset-ring-green-600/20 dark:bg-green-500/10 dark:text-green-500 dark:inset-ring-green-500/10">Ativo</span>
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div>
+                                <div class="-mt-px flex divide-x divide-gray-200 dark:divide-white/10">
+                                    <div class="flex w-0 flex-1">
+                                        <a href="mailto:janecooper@example.com" class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                                            <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 text-gray-400 dark:text-gray-500">
+                                                <path d="M3 4a2 2 0 0 0-2 2v1.161l8.441 4.221a1.25 1.25 0 0 0 1.118 0L19 7.162V6a2 2 0 0 0-2-2H3Z" />
+                                                <path d="m19 8.839-7.77 3.885a2.75 2.75 0 0 1-2.46 0L1 8.839V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.839Z" />
+                                            </svg>
+                                            Email
+                                        </a>
+                                    </div>
+                                    <div class="-ml-px flex w-0 flex-1">
+                                        <a href="tel:+1-202-555-0170" class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-5 text-gray-400 dark:text-gray-500">
+                                                <path d="M2 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM6.5 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM12.5 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+                                            </svg>
+                                            Opções
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <!-- Card item -->
+                        <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow-sm dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:outline dark:-outline-offset-1 dark:outline-white/10">
+                            <div class="flex flex-1 flex-col p-8">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mx-auto size-32 shrink-0 rounded-full bg-gray-200 text-indigo-600 dark:text-indigo-700 outline -outline-offset-1 outline-black/5 dark:bg-gray-300 dark:outline-white/10">
+                                    <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd" />
+                                </svg>
+                                <h3 class="mt-6 text-sm font-medium text-gray-900 dark:text-white">
+                                    <span class="text-indigo-500 dark:text-indigo-400 mr-1">#1
+                                    </span>
+                                    Nome
+                                </h3>
+                                <div class="mt-1 flex grow flex-col justify-between">
+                                    <div>
+                                        <span class="sr-only">CPF</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">123.456.789-00</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-500 rounded-full inline-block ml-1">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <span class="sr-only">Data de nascimento</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">31/12/1999</span>
+                                    </div>
+                                    <div class="mt-3">
+                                        <span class="sr-only">Status</span>
+                                        <span>
+                                            <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 inset-ring inset-ring-green-600/20 dark:bg-green-500/10 dark:text-green-500 dark:inset-ring-green-500/10">Ativo</span>
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div>
+                                <div class="-mt-px flex divide-x divide-gray-200 dark:divide-white/10">
+                                    <div class="flex w-0 flex-1">
+                                        <a href="mailto:janecooper@example.com" class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                                            <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 text-gray-400 dark:text-gray-500">
+                                                <path d="M3 4a2 2 0 0 0-2 2v1.161l8.441 4.221a1.25 1.25 0 0 0 1.118 0L19 7.162V6a2 2 0 0 0-2-2H3Z" />
+                                                <path d="m19 8.839-7.77 3.885a2.75 2.75 0 0 1-2.46 0L1 8.839V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.839Z" />
+                                            </svg>
+                                            Email
+                                        </a>
+                                    </div>
+                                    <div class="-ml-px flex w-0 flex-1">
+                                        <a href="tel:+1-202-555-0170" class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-5 text-gray-400 dark:text-gray-500">
+                                                <path d="M2 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM6.5 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM12.5 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+                                            </svg>
+                                            Opções
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <!-- Card item -->
+                        <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow-sm dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:outline dark:-outline-offset-1 dark:outline-white/10">
+                            <div class="flex flex-1 flex-col p-8">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mx-auto size-32 shrink-0 rounded-full bg-gray-200 text-indigo-600 dark:text-indigo-700 outline -outline-offset-1 outline-black/5 dark:bg-gray-300 dark:outline-white/10">
+                                    <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd" />
+                                </svg>
+                                <h3 class="mt-6 text-sm font-medium text-gray-900 dark:text-white">
+                                    <span class="text-indigo-500 dark:text-indigo-400 mr-1">#1
+                                    </span>
+                                    Nome
+                                </h3>
+                                <div class="mt-1 flex grow flex-col justify-between">
+                                    <div>
+                                        <span class="sr-only">CPF</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">123.456.789-00</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-500 rounded-full inline-block ml-1">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <span class="sr-only">Data de nascimento</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">31/12/1999</span>
+                                    </div>
+                                    <div class="mt-3">
+                                        <span class="sr-only">Status</span>
+                                        <span>
+                                            <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 inset-ring inset-ring-green-600/20 dark:bg-green-500/10 dark:text-green-500 dark:inset-ring-green-500/10">Ativo</span>
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div>
+                                <div class="-mt-px flex divide-x divide-gray-200 dark:divide-white/10">
+                                    <div class="flex w-0 flex-1">
+                                        <a href="mailto:janecooper@example.com" class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                                            <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 text-gray-400 dark:text-gray-500">
+                                                <path d="M3 4a2 2 0 0 0-2 2v1.161l8.441 4.221a1.25 1.25 0 0 0 1.118 0L19 7.162V6a2 2 0 0 0-2-2H3Z" />
+                                                <path d="m19 8.839-7.77 3.885a2.75 2.75 0 0 1-2.46 0L1 8.839V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.839Z" />
+                                            </svg>
+                                            Email
+                                        </a>
+                                    </div>
+                                    <div class="-ml-px flex w-0 flex-1">
+                                        <a href="tel:+1-202-555-0170" class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-5 text-gray-400 dark:text-gray-500">
+                                                <path d="M2 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM6.5 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM12.5 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+                                            </svg>
+                                            Opções
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <!-- Card item -->
+                        <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow-sm dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:outline dark:-outline-offset-1 dark:outline-white/10">
+                            <div class="flex flex-1 flex-col p-8">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mx-auto size-32 shrink-0 rounded-full bg-gray-200 text-indigo-600 dark:text-indigo-700 outline -outline-offset-1 outline-black/5 dark:bg-gray-300 dark:outline-white/10">
+                                    <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd" />
+                                </svg>
+                                <h3 class="mt-6 text-sm font-medium text-gray-900 dark:text-white">
+                                    <span class="text-indigo-500 dark:text-indigo-400 mr-1">#1
+                                    </span>
+                                    Nome
+                                </h3>
+                                <div class="mt-1 flex grow flex-col justify-between">
+                                    <div>
+                                        <span class="sr-only">CPF</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">123.456.789-00</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-500 rounded-full inline-block ml-1">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <span class="sr-only">Data de nascimento</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">31/12/1999</span>
+                                    </div>
+                                    <div class="mt-3">
+                                        <span class="sr-only">Status</span>
+                                        <span>
+                                            <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 inset-ring inset-ring-green-600/20 dark:bg-green-500/10 dark:text-green-500 dark:inset-ring-green-500/10">Ativo</span>
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div>
+                                <div class="-mt-px flex divide-x divide-gray-200 dark:divide-white/10">
+                                    <div class="flex w-0 flex-1">
+                                        <a href="mailto:janecooper@example.com" class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                                            <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 text-gray-400 dark:text-gray-500">
+                                                <path d="M3 4a2 2 0 0 0-2 2v1.161l8.441 4.221a1.25 1.25 0 0 0 1.118 0L19 7.162V6a2 2 0 0 0-2-2H3Z" />
+                                                <path d="m19 8.839-7.77 3.885a2.75 2.75 0 0 1-2.46 0L1 8.839V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.839Z" />
+                                            </svg>
+                                            Email
+                                        </a>
+                                    </div>
+                                    <div class="-ml-px flex w-0 flex-1">
+                                        <a href="tel:+1-202-555-0170" class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-5 text-gray-400 dark:text-gray-500">
+                                                <path d="M2 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM6.5 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM12.5 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+                                            </svg>
+                                            Opções
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <!-- Card item -->
+                        <li class="col-span-1 flex flex-col divide-y divide-gray-200 rounded-lg bg-white text-center shadow-sm dark:divide-white/10 dark:bg-gray-800/50 dark:shadow-none dark:outline dark:-outline-offset-1 dark:outline-white/10">
+                            <div class="flex flex-1 flex-col p-8">
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="mx-auto size-32 shrink-0 rounded-full bg-gray-200 text-indigo-600 dark:text-indigo-700 outline -outline-offset-1 outline-black/5 dark:bg-gray-300 dark:outline-white/10">
+                                    <path fill-rule="evenodd" d="M18.685 19.097A9.723 9.723 0 0 0 21.75 12c0-5.385-4.365-9.75-9.75-9.75S2.25 6.615 2.25 12a9.723 9.723 0 0 0 3.065 7.097A9.716 9.716 0 0 0 12 21.75a9.716 9.716 0 0 0 6.685-2.653Zm-12.54-1.285A7.486 7.486 0 0 1 12 15a7.486 7.486 0 0 1 5.855 2.812A8.224 8.224 0 0 1 12 20.25a8.224 8.224 0 0 1-5.855-2.438ZM15.75 9a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0Z" clip-rule="evenodd" />
+                                </svg>
+                                <h3 class="mt-6 text-sm font-medium text-gray-900 dark:text-white">
+                                    <span class="text-indigo-500 dark:text-indigo-400 mr-1">#1
+                                    </span>
+                                    Nome
+                                </h3>
+                                <div class="mt-1 flex grow flex-col justify-between">
+                                    <div>
+                                        <span class="sr-only">CPF</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">123.456.789-00</span>
+                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="size-4 bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-500 rounded-full inline-block ml-1">
+                                            <path fill-rule="evenodd" d="M10 18a8 8 0 1 0 0-16 8 8 0 0 0 0 16Zm3.857-9.809a.75.75 0 0 0-1.214-.882l-3.483 4.79-1.88-1.88a.75.75 0 1 0-1.06 1.061l2.5 2.5a.75.75 0 0 0 1.137-.089l4-5.5Z" clip-rule="evenodd" />
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <span class="sr-only">Data de nascimento</span>
+                                        <span class="text-sm text-gray-500 dark:text-gray-400">31/12/1999</span>
+                                    </div>
+                                    <div class="mt-3">
+                                        <span class="sr-only">Status</span>
+                                        <span>
+                                            <span class="inline-flex items-center rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 inset-ring inset-ring-green-600/20 dark:bg-green-500/10 dark:text-green-500 dark:inset-ring-green-500/10">Ativo</span>
+                                        </span>
+                                    </div>
+
+                                </div>
+                            </div>
+                            <div>
+                                <div class="-mt-px flex divide-x divide-gray-200 dark:divide-white/10">
+                                    <div class="flex w-0 flex-1">
+                                        <a href="mailto:janecooper@example.com" class="relative -mr-px inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-bl-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                                            <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 text-gray-400 dark:text-gray-500">
+                                                <path d="M3 4a2 2 0 0 0-2 2v1.161l8.441 4.221a1.25 1.25 0 0 0 1.118 0L19 7.162V6a2 2 0 0 0-2-2H3Z" />
+                                                <path d="m19 8.839-7.77 3.885a2.75 2.75 0 0 1-2.46 0L1 8.839V14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8.839Z" />
+                                            </svg>
+                                            Email
+                                        </a>
+                                    </div>
+                                    <div class="-ml-px flex w-0 flex-1">
+                                        <a href="tel:+1-202-555-0170" class="relative inline-flex w-0 flex-1 items-center justify-center gap-x-3 rounded-br-lg border border-transparent py-4 text-sm font-semibold text-gray-900 dark:text-white">
+                                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" class="size-5 text-gray-400 dark:text-gray-500">
+                                                <path d="M2 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM6.5 8a1.5 1.5 0 1 1 3 0 1.5 1.5 0 0 1-3 0ZM12.5 6.5a1.5 1.5 0 1 0 0 3 1.5 1.5 0 0 0 0-3Z" />
+                                            </svg>
+                                            Opções
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div class="px-4 sm:px-6 lg:px-8">
+            </div>
+
+            <!-- Botão de cadastrar cliente -->
+            <a href="clientes/cadastrar" class="rounded-full bg-indigo-600 p-2 md:p-3 lg:p-4  text-white shadow-xs hover:bg-indigo-500 focus:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 fixed bottom-4 right-4 z-50 focus:outline-hidden">
+                <div class="flex space-x-1 md:space-x-2 lg:space-x-3 flex-row items-center">
+                    <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 md:size-6 lg:size-7">
+                        <path d="M10.75 4.75a.75.75 0 0 0-1.5 0v4.5h-4.5a.75.75 0 0 0 0 1.5h4.5v4.5a.75.75 0 0 0 1.5 0v-4.5h4.5a.75.75 0 0 0 0-1.5h-4.5v-4.5Z" />
+                    </svg>
+                    <span class="mr-2">Cadastrar cliente</span>
+                </div>
+
+            </a>
+
+            <!-- Diálogo sobre deleção de cliente -->
+            <el-dialog>
+                <dialog id="dialog" aria-labelledby="dialog-title" class="fixed inset-0 size-auto max-h-none max-w-none overflow-y-auto bg-transparent backdrop:bg-transparent">
+                    <el-dialog-backdrop class="fixed inset-0 bg-gray-500/75 transition-opacity data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in"></el-dialog-backdrop>
+
+                    <div tabindex="0" class="flex min-h-full items-end justify-center p-4 text-center focus:outline-none sm:items-center sm:p-0">
+                        <el-dialog-panel class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all data-closed:translate-y-4 data-closed:opacity-0 data-enter:duration-300 data-enter:ease-out data-leave:duration-200 data-leave:ease-in sm:my-8 sm:w-full sm:max-w-lg data-closed:sm:translate-y-0 data-closed:sm:scale-95">
+                            <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                                <div class="sm:flex sm:items-start">
+                                    <div class="mx-auto flex size-12 shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:size-10">
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" data-slot="icon" aria-hidden="true" class="size-6 text-red-600">
+                                            <path d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" stroke-linecap="round" stroke-linejoin="round" />
+                                        </svg>
+                                    </div>
+                                    <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                                        <h3 id="dialog-title" class="text-base font-semibold text-gray-900">Deletar cliente?</h3>
+                                        <div class="mt-2">
+                                            <p class="text-sm text-gray-500">Se deletar o cliente, os contratos relacionados a este cliente também serão cancelados.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
+                                <a id="confirmar_deletar" href="" command="close" commandfor="dialog" class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto">Deletar</a>
+                                <button type="button" command="close" commandfor="dialog" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs ring-1 ring-gray-300 ring-inset hover:bg-gray-50 sm:mt-0 sm:w-auto">Cancelar</button>
+                            </div>
+                        </el-dialog-panel>
+                    </div>
+                </dialog>
+            </el-dialog>
+
+        </main>
+
+</body>
+
+</html>

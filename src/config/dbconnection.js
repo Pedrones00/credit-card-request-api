@@ -12,6 +12,7 @@ class DBConnection  {
             password: process.env.DB_PASSWORD,
             database: process.env.DB_NAME,
             dialect: 'mysql',
+            logging: false,
         };
         this.#connection = new Sequelize(this.#parametersDB);
     }

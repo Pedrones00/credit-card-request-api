@@ -21,6 +21,26 @@
                 dialog.show();
             });
         });
+
+        const form = document.querySelector('form');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const data = {
+                nome: form.nome.value,
+                tipo: form.tipo.value,
+                anuidade: form.anuidade.value,
+                bandeira: form.bandeira.value,
+            };
+
+            fetch('/api/cartoes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+            }).then(res => {});
+        });
+
     </script>
 </head>
 

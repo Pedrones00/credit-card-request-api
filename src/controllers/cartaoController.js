@@ -75,7 +75,7 @@ class CartaoController {
 
     }
 
-    async listAll(request, response) {
+    async listAll(request, response, api = false) {
         try {
             let cartoes = null;
 
@@ -85,14 +85,19 @@ class CartaoController {
                 cartoes = await this.#getActiveCards();
             }
 
-            response.status(200).json(cartoes);
+            if (api) {
+                response.status(200).json(cartoes);
+                return;
+            }
 
+            return cartoes;
+            
         } catch (error) {
             response.status(500).json({ error: error.message });
         }
     }
 
-    async searchID(request, response) {
+    async searchID(request, response, api = false) {
         try {
             const id = request.params.id;
 
@@ -101,7 +106,12 @@ class CartaoController {
                 return response.status(404).json({error: 'Cartão não encontrado'});
             }
 
-            response.status(200).json(cartao);
+            if (api) {
+                response.status(200).json(cartao);
+                return;
+            }
+            
+            return cartao;
 
         } catch (error) {
             response.status(500).json({ error: error.message });
@@ -141,7 +151,7 @@ class CartaoController {
         }
     }
 
-    async deleteCartao(request, response) {
+    async deleteCartao(request, response, api = false) {
         try {
             let today = new Date().toISOString();
 
@@ -153,17 +163,85 @@ class CartaoController {
             await cartao.update({dt_fim_vigencia: today});
 
             const contratos_desativados = await this.#disableContratos(cartao.id_cartao);
-
-            response.status(200).json({
-                message: "O cartão e seus contratos estarão desabilitado a partir de amanhã.",
-                cartao,
-                contratos_desativados
-            });
+            
+            if (api) {
+                response.status(200).json({
+                    message: "O cartão e seus contratos estarão desabilitado a partir de amanhã.",
+                    cartao,
+                    contratos_desativados
+                });
+            }
+            
 
         } catch (error) {
             response.status(500).json({ error: error.message });
         }
     }
+
+    async indexPage(request, response) {
+        try {
+            const cartoes = await this.listAll(request, response);
+
+            response.render("cartoes", {
+                titulo: "Cartões",
+                alerta: false,
+                cartoes,
+            });
+        } catch (error) {
+            response.status(500).json({ error: error.message });
+        }
+    }
+
+    async registerPage(request, response) {
+        try {
+            response.render("cadastrar_cartao", { titulo: "Cartões" });
+        } catch (error) {
+            response.status(500).json({ error: error.message });
+        }
+    }
+
+    async viewPage(request, response) {
+        try {
+            const cartao = await this.searchID(request, response);
+
+            response.render("visualizar_cartao", {
+                titulo: "Cartões",
+                cartao,
+            });
+        } catch (error) {
+            response.status(500).json({ error: error.message });
+        }
+    }
+
+    async editPage(request, response) {
+        try {
+            const cartao = await this.searchID(request, response);
+
+            response.render("editar_cartao", {
+                titulo: "Cartões",
+                cartao,
+            });
+        } catch (error) {
+            response.status(500).json({ error: error.message });
+        }
+    }
+
+    async deletePage(request, response) {
+        try {
+            this.deleteCartao(request, response);
+
+            const cartoes = await this.listAll(request, response);
+
+            response.render("cartoes", {
+                titulo: "Cartões",
+                alerta: true,
+                cartoes,
+            });
+        } catch (error) {
+            response.status(500).json({ error: error.message });
+        }
+    }
+
 }
 
 export default CartaoController;

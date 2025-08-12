@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from "cors";
 import clienteRoute from './clienteRoutes.js';
 import cartaoRoute from './cartaoRoutes.js';
 import contratoRoute from './contratoRoutes.js';
@@ -8,7 +9,20 @@ const routes = async (app) => {
     const {clienteController, cartaoController, contratoController} = await setupControllers();
 
     app.use(express.json());
+    app.use(cors());
+    app.use(express.static("public"));
 
+    const index_route = () => {
+        const route = express.Router();
+
+        route.get("/", (request, response) => {
+            response.render("index", {titulo: "Início"})
+        });
+
+        return route;
+    }
+
+    app.use(index_route());
     app.use(clienteRoute(clienteController));
     app.use(cartaoRoute(cartaoController));
     app.use(contratoRoute(contratoController));

@@ -31,7 +31,7 @@ const clientes = [
     email: "email@dominio.com",
     dt_nascimento: "1990-01-01",
     cpf_regular: 0, // 1 se o CPF estiver regular, 0 se irregular
-    cliente_ativo: 1, // 1 se o cliente estiver ativo, 0 se inativo
+    cliente_ativo: 0, // 1 se o cliente estiver ativo, 0 se inativo
   },
 ];
 const cartoes = [

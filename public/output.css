@@ -7,13 +7,18 @@
       "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
       "Courier New", monospace;
+    --color-red-50: oklch(97.1% 0.013 17.38);
     --color-red-100: oklch(93.6% 0.032 17.717);
     --color-red-400: oklch(70.4% 0.191 22.216);
     --color-red-500: oklch(63.7% 0.237 25.331);
     --color-red-600: oklch(57.7% 0.245 27.325);
+    --color-red-700: oklch(50.5% 0.213 27.518);
     --color-orange-500: oklch(70.5% 0.213 47.604);
+    --color-yellow-50: oklch(98.7% 0.026 102.212);
+    --color-yellow-400: oklch(85.2% 0.199 91.936);
     --color-yellow-500: oklch(79.5% 0.184 86.047);
     --color-yellow-600: oklch(68.1% 0.162 75.834);
+    --color-yellow-800: oklch(47.6% 0.114 61.907);
     --color-green-50: oklch(98.2% 0.018 155.826);
     --color-green-100: oklch(96.2% 0.044 156.743);
     --color-green-300: oklch(87.1% 0.15 154.449);
@@ -28,8 +33,6 @@
     --color-indigo-500: oklch(58.5% 0.233 277.117);
     --color-indigo-600: oklch(51.1% 0.262 276.966);
     --color-indigo-700: oklch(45.7% 0.24 277.023);
-    --color-indigo-800: oklch(39.8% 0.195 277.366);
-    --color-indigo-950: oklch(25.7% 0.09 281.288);
     --color-purple-500: oklch(62.7% 0.265 303.9);
     --color-pink-500: oklch(65.6% 0.241 354.308);
     --color-slate-800: oklch(27.9% 0.041 260.031);
@@ -557,6 +560,9 @@
       margin-block-end: calc(calc(var(--spacing) * 6) * calc(1 - var(--tw-space-y-reverse)));
     }
   }
+  .gap-x-1\.5 {
+    column-gap: calc(var(--spacing) * 1.5);
+  }
   .gap-x-3 {
     column-gap: calc(var(--spacing) * 3);
   }
@@ -721,6 +727,9 @@
   .bg-purple-500 {
     background-color: var(--color-purple-500);
   }
+  .bg-red-50 {
+    background-color: var(--color-red-50);
+  }
   .bg-red-100 {
     background-color: var(--color-red-100);
   }
@@ -747,6 +756,9 @@
   }
   .bg-white {
     background-color: var(--color-white);
+  }
+  .bg-yellow-50 {
+    background-color: var(--color-yellow-50);
   }
   .bg-yellow-500 {
     background-color: var(--color-yellow-500);
@@ -926,11 +938,17 @@
   .text-red-600 {
     color: var(--color-red-600);
   }
+  .text-red-700 {
+    color: var(--color-red-700);
+  }
   .text-white {
     color: var(--color-white);
   }
   .text-yellow-600 {
     color: var(--color-yellow-600);
+  }
+  .text-yellow-800 {
+    color: var(--color-yellow-800);
   }
   .shadow-lg {
     --tw-shadow: 0 10px 15px -3px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 4px 6px -4px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
@@ -988,6 +1006,18 @@
     --tw-inset-ring-color: color-mix(in srgb, oklch(62.7% 0.194 149.214) 20%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
       --tw-inset-ring-color: color-mix(in oklab, var(--color-green-600) 20%, transparent);
+    }
+  }
+  .inset-ring-red-600\/10 {
+    --tw-inset-ring-color: color-mix(in srgb, oklch(57.7% 0.245 27.325) 10%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-inset-ring-color: color-mix(in oklab, var(--color-red-600) 10%, transparent);
+    }
+  }
+  .inset-ring-yellow-600\/20 {
+    --tw-inset-ring-color: color-mix(in srgb, oklch(68.1% 0.162 75.834) 20%, transparent);
+    @supports (color: color-mix(in lab, red, red)) {
+      --tw-inset-ring-color: color-mix(in oklab, var(--color-yellow-600) 20%, transparent);
     }
   }
   .outline {
@@ -1144,6 +1174,13 @@
   .focus-within\:outline-indigo-600 {
     &:focus-within {
       outline-color: var(--color-indigo-600);
+    }
+  }
+  .hover\:cursor-default {
+    &:hover {
+      @media (hover: hover) {
+        cursor: default;
+      }
     }
   }
   .hover\:cursor-pointer {
@@ -1839,6 +1876,14 @@
       }
     }
   }
+  .dark\:bg-green-400\/10 {
+    @media (prefers-color-scheme: dark) {
+      background-color: color-mix(in srgb, oklch(79.2% 0.209 151.711) 10%, transparent);
+      @supports (color: color-mix(in lab, red, red)) {
+        background-color: color-mix(in oklab, var(--color-green-400) 10%, transparent);
+      }
+    }
+  }
   .dark\:bg-green-500\/10 {
     @media (prefers-color-scheme: dark) {
       background-color: color-mix(in srgb, oklch(72.3% 0.219 149.579) 10%, transparent);
@@ -1855,6 +1900,14 @@
   .dark\:bg-indigo-700 {
     @media (prefers-color-scheme: dark) {
       background-color: var(--color-indigo-700);
+    }
+  }
+  .dark\:bg-red-400\/10 {
+    @media (prefers-color-scheme: dark) {
+      background-color: color-mix(in srgb, oklch(70.4% 0.191 22.216) 10%, transparent);
+      @supports (color: color-mix(in lab, red, red)) {
+        background-color: color-mix(in oklab, var(--color-red-400) 10%, transparent);
+      }
     }
   }
   .dark\:bg-red-500 {
@@ -1888,6 +1941,14 @@
       background-color: color-mix(in srgb, #fff 10%, transparent);
       @supports (color: color-mix(in lab, red, red)) {
         background-color: color-mix(in oklab, var(--color-white) 10%, transparent);
+      }
+    }
+  }
+  .dark\:bg-yellow-400\/10 {
+    @media (prefers-color-scheme: dark) {
+      background-color: color-mix(in srgb, oklch(85.2% 0.199 91.936) 10%, transparent);
+      @supports (color: color-mix(in lab, red, red)) {
+        background-color: color-mix(in oklab, var(--color-yellow-400) 10%, transparent);
       }
     }
   }
@@ -1931,11 +1992,6 @@
       color: var(--color-indigo-700);
     }
   }
-  .dark\:text-orange-500 {
-    @media (prefers-color-scheme: dark) {
-      color: var(--color-orange-500);
-    }
-  }
   .dark\:text-red-400 {
     @media (prefers-color-scheme: dark) {
       color: var(--color-red-400);
@@ -1965,11 +2021,27 @@
       }
     }
   }
+  .dark\:inset-ring-red-400\/20 {
+    @media (prefers-color-scheme: dark) {
+      --tw-inset-ring-color: color-mix(in srgb, oklch(70.4% 0.191 22.216) 20%, transparent);
+      @supports (color: color-mix(in lab, red, red)) {
+        --tw-inset-ring-color: color-mix(in oklab, var(--color-red-400) 20%, transparent);
+      }
+    }
+  }
   .dark\:inset-ring-white\/5 {
     @media (prefers-color-scheme: dark) {
       --tw-inset-ring-color: color-mix(in srgb, #fff 5%, transparent);
       @supports (color: color-mix(in lab, red, red)) {
         --tw-inset-ring-color: color-mix(in oklab, var(--color-white) 5%, transparent);
+      }
+    }
+  }
+  .dark\:inset-ring-yellow-400\/20 {
+    @media (prefers-color-scheme: dark) {
+      --tw-inset-ring-color: color-mix(in srgb, oklch(85.2% 0.199 91.936) 20%, transparent);
+      @supports (color: color-mix(in lab, red, red)) {
+        --tw-inset-ring-color: color-mix(in oklab, var(--color-yellow-400) 20%, transparent);
       }
     }
   }
@@ -2183,6 +2255,30 @@
         background-color: color-mix(in srgb, #fff 10%, transparent);
         @supports (color: color-mix(in lab, red, red)) {
           background-color: color-mix(in oklab, var(--color-white) 10%, transparent);
+        }
+      }
+    }
+  }
+  .dark\:disabled\:text-gray-500 {
+    @media (prefers-color-scheme: dark) {
+      &:disabled {
+        color: var(--color-gray-500);
+      }
+    }
+  }
+  .dark\:disabled\:outline-white {
+    @media (prefers-color-scheme: dark) {
+      &:disabled {
+        outline-color: var(--color-white);
+      }
+    }
+  }
+  .dark\:disabled\:outline-white\/5 {
+    @media (prefers-color-scheme: dark) {
+      &:disabled {
+        outline-color: color-mix(in srgb, #fff 5%, transparent);
+        @supports (color: color-mix(in lab, red, red)) {
+          outline-color: color-mix(in oklab, var(--color-white) 5%, transparent);
         }
       }
     }

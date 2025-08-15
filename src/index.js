@@ -30,7 +30,7 @@ const clientes = [
     cpf: "123.456.789-00",
     email: "email@dominio.com",
     dt_nascimento: "1990-01-01",
-    cpf_regular: 1, // 1 se o CPF estiver regular, 0 se irregular
+    cpf_regular: 0, // 1 se o CPF estiver regular, 0 se irregular
     cliente_ativo: 1, // 1 se o cliente estiver ativo, 0 se inativo
   },
 ];

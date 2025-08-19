@@ -7,3 +7,5 @@
 - Recurso visual adicional que pode melhorar a experiência do usuário durante a navegação entre diferentes páginas
 
 [ ] Dashboard
+
+[ ] Selecionar tipo de cartão com crédito e débito ao mesmo tempo

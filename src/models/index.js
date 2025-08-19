@@ -18,7 +18,7 @@ export default async function () {
     Cartao.hasMany(Contrato, {foreignKey: 'id_cartao'});
     Contrato.belongsTo(Cartao, {foreignKey: 'id_cartao'});
 
-    await dbconnection.connection.sync({alter: true});
+    await dbconnection.connection.sync();
 
     return {
         Cliente,

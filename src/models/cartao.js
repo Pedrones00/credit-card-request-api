@@ -26,6 +26,7 @@ export default (sequelize) => {
             anuidade: {
                 type: DataTypes.DECIMAL(5, 2),
                 allowNull: false,
+                defaultValue: 0.00,
             },
             dt_inicio_vigencia: {
                 type: DataTypes.DATEONLY,

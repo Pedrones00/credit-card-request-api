@@ -6,8 +6,13 @@ class CartaoController {
         this.Contrato = ContratoModel;
     }
 
-    async #getActiveCards() {
+    #getToday(){
         let today = new Date().toISOString();
+        return today;
+    }
+
+    async #getActiveCards() {
+        let today = this.#getToday();
 
         const cartoes = await this.Cartao.findAll({
             where: {
@@ -19,11 +24,12 @@ class CartaoController {
                     }
             }
         });
+
         return cartoes;
     }
 
     async #getDeactiveCards() {
-        let today = new Date().toISOString();
+        let today = this.#getToday();
 
         const cartoes = await this.Cartao.findAll({
             where: {
@@ -42,12 +48,13 @@ class CartaoController {
                     ]
             }
         });
+
         return cartoes;
     }
 
     async #disableContratos(id_cartao) {
 
-        let today = new Date().toISOString();
+        let today = this.#getToday();
         
         const contratos_ativos = await this.Contrato.findAll({
             where: {
@@ -64,123 +71,157 @@ class CartaoController {
         return contratos_ativos;
     }
 
-    async #validateInputs(request, response) {
+    #validateInputs(request) {
 
-        if (request.body.nome && request.body.tipo && request.body.bandeira && request.body.anuidade) {
+        if (request.body && request.body.nome && request.body.tipo && request.body.bandeira) {
             return true;
         }
 
-        response.status(400).json({error: 'Campos obrigatórios não preenchidos'});
         return false;
 
     }
 
-    async listAll(request, response, api = false) {
-        try {
-            let cartoes = null;
+    async #listAll(request) {
 
-            if (request.query.ativo === 'false') {
-                cartoes = await this.#getDeactiveCards();
-            } else {
-                cartoes = await this.#getActiveCards();
-            }
+        let cartoes = null;
 
-            if (api) {
-                response.status(200).json(cartoes);
-                return;
-            }
-
-            return cartoes;
-            
-        } catch (error) {
-            response.status(500).json({ error: error.message });
+        if (request.query.ativo === 'false') {
+            cartoes = await this.#getDeactiveCards();
+        } else {
+            cartoes = await this.#getActiveCards();
         }
+
+        return cartoes;
+
     }
 
-    async searchID(request, response, api = false) {
-        try {
-            const id = request.params.id;
+    async #searchID(id) {
+        const cartao = await this.Cartao.findByPk(id);
 
-            const cartao = await this.Cartao.findByPk(id);
-            if (!cartao) {
-                return response.status(404).json({error: 'Cartão não encontrado'});
-            }
-
-            if (api) {
-                response.status(200).json(cartao);
-                return;
-            }
-            
-            return cartao;
-
-        } catch (error) {
-            response.status(500).json({ error: error.message });
-        }
+        return cartao;
     }
 
-    async register(request, response) {
-        try {
-            const isValidInput = await this.#validateInputs(request, response);
-            if (!isValidInput) return;
+    async #register(request) {
+
+            const isValidInput = this.#validateInputs(request);
+            if (!isValidInput) {
+                const err =  new Error("Campos obrigatórios não preenchidos!");
+                err.statusCode = 400;
+                throw err;
+            }
 
             const newCartao = await this.Cartao.create(request.body);
+            return newCartao;
+    }
 
-            response.status(200).json(newCartao);
+    async #updateCartao(request) {
+        const id = request.body.id;
+        const cartao = await this.#searchID(id);
+        if (!cartao) {
+            const err = new Error("Cartão não encontrado");
+            err.statusCode = 404;
+            throw err;
+        }
 
+        const updatedCartao = await cartao.update(request.body);
+        return updatedCartao;
+    }
+
+    async #deleteCartao(id) {
+        const today = this.#getToday();
+        const cartao = await this.Cartao.findByPk(id);
+
+        if (!cartao) {
+            const err = new Error("Cartão não encontrado");
+            err.statusCode = 404;
+            throw err;
+        }
+
+        await cartao.update({dt_fim_vigencia: today});
+        const contratos_desativados = await this.#disableContratos(cartao.id_cartao);
+
+        return {cartao, contratos_desativados};
+        
+    }
+
+    async listAllAPI(request, response) {
+        try {
+            const cartoes = await this.#listAll(request);
+
+            return response.status(200).json(cartoes);
+            
         } catch (error) {
-            response.status(500).json({ error: error.message });
+            return response.status(500).json({error: error.message});
         }
     }
 
-    async updateCartao(request, response) {
+    async searchIDAPI(request, response) {
         try {
-            const cartao = await this.Cartao.findByPk(request.body.id);
+            const id = request.params.id;
+            const cartao = await this.#searchID(id);
+
             if (!cartao) {
-                return response.status(404).json({error: 'Cartão não encontrado'});
+                return response.status(404).json({error: "Cartão não encontrado"});
             }
 
-            await cartao.update(request.body);
+            return response.status(200).json(cartao);
 
-            response.status(200).json({
+        } catch (error) {
+            return response.status(500).json({ error: error.message });
+        }
+    }
+
+    async registerAPI(request, response) {
+        try {
+            const newCartao = await this.#register(request);
+
+            response.status(200).json(newCartao);
+            
+        } catch (error) {
+            if (error.statusCode === 400) return response.status(error.statusCode).json({error: error.message});
+
+            return response.status(500).json({ error: error.message});
+        }
+    }
+
+    async updateCartaoAPI(request, response) {
+        try {
+            const updatedCartao = await this.#updateCartao(request);
+
+            return response.status(200).json({
                 message: "Cartão atualizado com sucesso",
-                cartao,
+                updatedCartao,
             });
 
         } catch (error) {
-            response.status(500).json({ error: error.message });
+            if (error.statusCode === 404) return response.status(error.statusCode).json({error: error.message});
+
+            return response.status(500).json({ error: error.message});
         }
     }
 
-    async deleteCartao(request, response, api = false) {
+    async deleteCartaoAPI(request, response) {
         try {
-            let today = new Date().toISOString();
+            const id = request.params.id;
 
-            const cartao = await this.Cartao.findByPk(request.params.id);
-            if (!cartao) {
-                return response.status(404).json({error: 'Cartão não encontrado'});
-            }
+            const {cartao, contratos_desativados} = await this.#deleteCartao(id);
 
-            await cartao.update({dt_fim_vigencia: today});
-
-            const contratos_desativados = await this.#disableContratos(cartao.id_cartao);
-            
-            if (api) {
-                response.status(200).json({
+            response.status(200).json({
                     message: "O cartão e seus contratos estarão desabilitado a partir de amanhã.",
                     cartao,
                     contratos_desativados
                 });
-            }
-            
 
         } catch (error) {
+            if (error.statusCode === 404) return response.status(error.statusCode).json({error: error.message});
+
             response.status(500).json({ error: error.message });
         }
     }
 
     async indexPage(request, response) {
         try {
-            const cartoes = await this.listAll(request, response);
+            const cartoes = await this.#listAll(request);
 
             response.render("cartoes", {
                 titulo: "Cartões",
@@ -188,7 +229,7 @@ class CartaoController {
                 cartoes,
             });
         } catch (error) {
-            response.status(500).json({ error: error.message });
+            response.render("500", {error});
         }
     }
 
@@ -196,41 +237,45 @@ class CartaoController {
         try {
             response.render("cadastrar_cartao", { titulo: "Cartões" });
         } catch (error) {
-            response.status(500).json({ error: error.message });
+            response.render("500", {error});
         }
     }
 
     async viewPage(request, response) {
         try {
-            const cartao = await this.searchID(request, response);
+            const id = request.params.id;
+            const cartao = await this.#searchID(id);
 
             response.render("visualizar_cartao", {
                 titulo: "Cartões",
                 cartao,
             });
         } catch (error) {
-            response.status(500).json({ error: error.message });
+            response.render("500", {error});
         }
     }
 
     async editPage(request, response) {
         try {
-            const cartao = await this.searchID(request, response);
+            const id = request.params.id
+            const cartao = await this.#searchID(id);
 
             response.render("editar_cartao", {
                 titulo: "Cartões",
                 cartao,
             });
         } catch (error) {
-            response.status(500).json({ error: error.message });
+            response.render("500", {error});
         }
     }
 
     async deletePage(request, response) {
         try {
-            this.deleteCartao(request, response);
+            const id = request.params.id;
 
-            const cartoes = await this.listAll(request, response);
+            const {cartao, contratos_desativados} = await this.#deleteCartao(id);
+
+            const cartoes = await this.#listAll(request);
 
             response.render("cartoes", {
                 titulo: "Cartões",
@@ -238,7 +283,7 @@ class CartaoController {
                 cartoes,
             });
         } catch (error) {
-            response.status(500).json({ error: error.message });
+            response.render("500", {error});
         }
     }
 

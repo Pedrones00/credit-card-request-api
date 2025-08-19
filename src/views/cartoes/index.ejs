@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
-    <title>Cartões</title>
+    <title>
+        <%= titulo %>
+    </title>
     <link href="/output.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
     <script type="module">
@@ -44,7 +46,7 @@
 
 <body class="h-full bg-gray-50 dark:bg-gray-900">
 
-    <%- include('partials/header') %>
+    <%- include('../partials/header') %>
 
         <main class="py-10 lg:pl-72 ">
             <!-- Container -->
@@ -59,7 +61,7 @@
                                 </svg>
                             </div>
                             <div class="ml-3">
-                                <p class="text-sm font-medium text-green-800 dark:text-green-300">Cartão deletado!</p>
+                                <p class="text-sm font-medium text-green-800 dark:text-green-300">Registro de cartão desativado!</p>
                             </div>
                             <div class="ml-auto pl-3">
                                 <div class="-mx-1.5 -my-1.5">

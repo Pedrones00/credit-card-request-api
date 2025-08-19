@@ -31,7 +31,7 @@ const clientes = [
     email: "email@dominio.com",
     dt_nascimento: "1990-01-01",
     cpf_regular: 0, // 1 se o CPF estiver regular, 0 se irregular
-    cliente_ativo: 0, // 1 se o cliente estiver ativo, 0 se inativo
+    cliente_ativo: 1, // 1 se o cliente estiver ativo, 0 se inativo
   },
 ];
 const cartoes = [
@@ -63,18 +63,18 @@ app.get("/", (request, response) => {
   response.render("index", { titulo: "Início" });
 });
 
-// Rota para visualizar todos os cartões salvos
+// Rota para visualizar todos os cartões registrados
 app.get("/cartoes", (request, response) => {
-  response.render("cartoes", {
+  response.render("cartoes/index", {
     titulo: "Cartões",
     alerta: false,
     cartoes,
   });
 });
 
-// Rota para visualizar todos os clientes salvos
+// Rota para visualizar todos os clientes registrados
 app.get("/clientes", (request, response) => {
-  response.render("clientes", {
+  response.render("clientes/index", {
     titulo: "Clientes",
     alerta: false,
     clientes,
@@ -83,10 +83,15 @@ app.get("/clientes", (request, response) => {
 
 // Rota para cadastrar um novo cartão
 app.get("/cartoes/cadastrar", (request, response) => {
-  response.render("cadastrar_cartao", { titulo: "Cartões" });
+  response.render("cartoes/create", { titulo: "Cartões" });
 });
 
-// Rota para visualizar um cartão
+// Rota para cadastrar um novo cliente
+app.get("/clientes/cadastrar", (request, response) => {
+  response.render("clientes/create", { titulo: "Clientes" });
+});
+
+// Rota para visualizar os dados de um cartão
 app.get("/cartoes/visualizar/:id", (request, response) => {
   const id = Number(request.params.id);
   const cartao = cartoes.find((c) => c.id_cartao === id);
@@ -95,13 +100,28 @@ app.get("/cartoes/visualizar/:id", (request, response) => {
     return response.status(404).render("404");
   }
 
-  response.render("visualizar_cartao", {
+  response.render("cartoes/read", {
     titulo: "Cartões",
     cartao,
   });
 });
 
-// Rota para editar um cartão
+// Rota para visualizar os dados de um cliente
+app.get("/clientes/visualizar/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const cliente = clientes.find((c) => c.id_cliente === id);
+
+  if (!cliente) {
+    return response.status(404).render("404");
+  }
+
+  response.render("clientes/read", {
+    titulo: "Clientes",
+    cliente,
+  });
+});
+
+// Rota para editar os dados de um cartão
 app.get("/cartoes/editar/:id", (request, response) => {
   const id = Number(request.params.id);
   const cartao = cartoes.find((c) => c.id_cartao === id);
@@ -110,13 +130,28 @@ app.get("/cartoes/editar/:id", (request, response) => {
     return response.status(404).render("404");
   }
 
-  response.render("editar_cartao", {
+  response.render("cartoes/update", {
     titulo: "Cartões",
     cartao,
   });
 });
 
-// Rota para deletar um cartão (pendente de implementação)
+// Rota para editar os dados de um cliente
+app.get("/clientes/editar/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const cliente = clientes.find((c) => c.id_cliente === id);
+
+  if (!cliente) {
+    return response.status(404).render("404");
+  }
+
+  response.render("clientes/update", {
+    titulo: "Clientes",
+    cliente,
+  });
+});
+
+// Rota para desativar um cartão
 app.get("/cartoes/deletar/:id", (request, response) => {
   const id = Number(request.params.id);
   const cartao = cartoes.find((c) => c.id_cartao === id);
@@ -125,10 +160,26 @@ app.get("/cartoes/deletar/:id", (request, response) => {
     return response.status(404).render("404");
   }
 
-  response.render("cartoes", {
+  response.render("cartoes/index", {
     titulo: "Cartões",
     alerta: true,
     cartoes,
+  });
+});
+
+// Rota para desativar o registro de um cliente
+app.get("/clientes/deletar/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const cliente = clientes.find((c) => c.id_cliente === id);
+
+  if (!cliente) {
+    return response.status(404).render("404");
+  }
+
+  response.render("clientes/index", {
+    titulo: "Clientes",
+    alerta: true,
+    clientes,
   });
 });
 

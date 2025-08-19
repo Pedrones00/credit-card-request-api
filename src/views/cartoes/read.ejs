@@ -5,7 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
-    <title>Cartões</title>
+    <title>
+        <%= titulo %>
+    </title>
     <link href="/output.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
 </head>
@@ -13,12 +15,12 @@
 
 <body class="h-full bg-gray-50 dark:bg-gray-900">
 
-    <%- include('partials/header') %>
+    <%- include('../partials/header') %>
 
         <main class="py-10 lg:pl-72">
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 <div class="mx-auto max-w-3xl">
-                    <h2 class="font-medium text-xl text-gray-500 dark:text-white">Visualização de cartão de crédito</h2>
+                    <h2 class="font-medium text-xl text-gray-500 dark:text-white">Visualização de dados de cartão de crédito</h2>
 
                     <form class="bg-white rounded-lg max-w-2xl shadow-xs outline outline-gray-900/5 sm:rounded-xl md:col-span-2 dark:bg-gray-800/50 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10 mt-3">
                         <!-- Form fields -->
@@ -27,7 +29,7 @@
                             <div>
                                 <label for="nome" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Nome</label>
                                 <div class="mt-2">
-                                    <input disabled placeholder="<%= cartao.nome %>" id="nome" type="text" name="nome" class="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:outline-gray-200 sm:text-sm/6 dark:bg-white/5 dark:text-gray-300 dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500 dark:disabled:bg-white/10 dark:disabled:text-gray-500 dark:disabled:outline-white/5" />
+                                    <input disabled value="<%= cartao.nome %>" id="nome" type="text" name="nome" class="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:outline-gray-200 sm:text-sm/6 dark:bg-white/5 dark:text-gray-300 dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500 dark:disabled:bg-white/10 dark:disabled:text-gray-500 dark:disabled:outline-white/5" />
                                 </div>
                             </div>
 
@@ -50,7 +52,7 @@
                             <div class="mt-8">
                                 <label for="anuidade" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Anuidade</label>
                                 <div class="mt-2">
-                                    <input disabled placeholder="R$ <%= Number(cartao.anuidade).toFixed(2).replace('.', ',') %>" id="anuidade" type="number" name="anuidade" class="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:outline-gray-200 sm:text-sm/6 dark:bg-white/5 dark:text-gray-300 dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500 dark:disabled:bg-white/10 dark:disabled:text-gray-500 dark:disabled:outline-white/5" />
+                                    <input disabled value="R$ <%= Number(cartao.anuidade).toFixed(2).replace('.', ',') %>" id="anuidade" type="text" name="anuidade" class="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:outline-gray-200 sm:text-sm/6 dark:bg-white/5 dark:text-gray-300 dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500 dark:disabled:bg-white/10 dark:disabled:text-gray-500 dark:disabled:outline-white/5" />
                                 </div>
                             </div>
 
@@ -58,7 +60,7 @@
                             <div class="mt-8">
                                 <label for="bandeira" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Bandeira</label>
                                 <div class="mt-2">
-                                    <input disabled placeholder="<%= cartao.bandeira %>" id="bandeira" type="text" name="bandeira" class="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:outline-gray-200 sm:text-sm/6 dark:bg-white/5 dark:text-gray-300 dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500 dark:disabled:bg-white/10 dark:disabled:text-gray-500 dark:disabled:outline-white/5" />
+                                    <input disabled value="<%= cartao.bandeira %>" id="bandeira" type="text" name="bandeira" class="block w-full rounded-md bg-white px-3 py-1.5 text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:outline-gray-200 sm:text-sm/6 dark:bg-white/5 dark:text-gray-300 dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500 dark:disabled:bg-white/10 dark:disabled:text-gray-500 dark:disabled:outline-white/5" />
                                 </div>
                             </div>
 

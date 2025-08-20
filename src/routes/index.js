@@ -7,7 +7,7 @@ import setupControllers from '../controllers/index.js';
 const routes = async (app) => {
     const {clienteController, cartaoController, contratoController} = await setupControllers();
 
-    const index_route = () => {
+    const indexRoute = () => {
         const route = express.Router();
 
         route.get("/", (request, response) => {
@@ -17,10 +17,13 @@ const routes = async (app) => {
         return route;
     }
 
-    app.use(index_route());
+    const routeNotFound = (request, response) => response.status(404).render("404", { titulo: "Página não encontrada" });
+
+    app.use(indexRoute());
     app.use(clienteRoute(clienteController));
     app.use(cartaoRoute(cartaoController));
     app.use(contratoRoute(contratoController));
+    app.use(routeNotFound);
 }
 
 export default routes;

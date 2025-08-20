@@ -7,45 +7,44 @@ class ClienteController {
         this.Contrato = ContratoModel;
     }
 
-    async #validateInputs (request, response) {
-        if (!request.body.nome || !request.body.cpf || !request.body.dt_nascimento) {
-            response.status(400).json({error: 'Campos obrigatórios não preenchidos'});
-            return false;
-        }
+    #getToday() {
+        const today = new Date().toISOString();
 
-        return true;
+        return today;
     }
 
-    async #validateClienteAtivo (request, response, cliente) {
+    #validateInputs (request) {
+        if (request.body && request.body.nome && request.body.cpf && request.body.dt_nascimento) {
+            return true;
+        }
+        return false;
+    }
+
+    #validateClienteAtivo (request, cliente) {
         if (cliente.cpf_regular === false && request.body.cliente_ativo === true) {
-            response.status(400).json({error: 'Cliente com cpf irregular'});
             return false;
         }
-
         return true;
     }
 
-    async #verifyDuplicateCPF (request, response, cliente) {
+    async #verifyDuplicateCPF (request, cliente) {
         const cpfRequest = request.body.cpf;
         let cpfInUse = null;
 
-        if (cpfRequest && cpfRequest !== cliente.cpf) {
+        if (cpfRequest && cliente && cpfRequest !== cliente.cpf) {
             cpfInUse = await this.Cliente.findOne({
                 where: {cpf: cpfRequest}
             })
         }
 
-        if (cpfInUse) {
-            response.status(409).json({error: 'CPF em uso'});
-            return false;
-        }
+        if (cpfInUse) return false;
 
         return true;
     }
 
     async #disableContratos(id_cliente) {
     
-            let today = new Date().toISOString();
+            let today = this.#getToday();
             
             const contratos_ativos = await this.Contrato.findAll({
                 where: {
@@ -62,133 +61,297 @@ class ClienteController {
             return contratos_ativos;
         }
 
-    async listAll(request, response) {
-        try {
-            let clienteState = true;
-            const cpfCliente = request.query.cpf;
-            const details = request.query.details;
+    async #listAll(clienteState = true, cpfCliente = null, details = true) {
 
-            if (request.query.ativo === 'false') {
-                clienteState = false
-            }
-
-            const clientes = await this.Cliente.findAll({
+        const clientes = await this.Cliente.findAll({
                 where: {
                     cliente_ativo: clienteState,
                     ...(cpfCliente ? {cpf: cpfCliente} : {}) 
                 },
-                include: details === 'true' ?
-                    [{model: this.Contrato}, ] :
-                    []
+                include: details === true ? 
+                    [{
+                        model: this.Contrato,
+                        include: [{model: this.Cartao}]
+                    }] :
+                    [],
             });
-            response.status(200).json(clientes);
 
-        } catch (error) {
-            response.status(500).json({error: error.message})
+        if (!clientes && cpfCliente) {
+            const err = new Error("Cliente não encontrado");
+            err.statusCode = 404;
+            throw err;
         }
+
+        return clientes;
     }
 
-    async register(request, response) {
-        try {
-            const isValidInput = await this.#validateInputs(request, response);
-            if (!isValidInput) return;
+    async #register(request) {
 
-            const searchCliente = await this.Cliente.findOne({
-                where: {cpf: request.body.cpf}
-            });
-
-            if (searchCliente) {
-                return response.status(409).json({
-                    error: 'Usuário com cpf já existente.'
-                });
-            }
-
-            if (request.body.cpf_regular === false) {
-                return response.status(403).json({
-                    error: 'Usuário com cpf irregular, cadastro não efetuado.'
-                });
-            }
-
-            const newCliente = await this.Cliente.create(request.body);
-            response.status(201).json({
-                message: 'Cliente cadastrado com sucesso',
-                client: newCliente,
-            });
-
-        } catch (error) {
-            response.status(500).json({error: error.message});
+        const isValidInput = this.#validateInputs(request);
+        if (!isValidInput) {
+                const err =  new Error("Campos obrigatórios não preenchidos!");
+                err.statusCode = 400;
+                throw err;
         }
+
+        const checkExistingCliente = await this.Cliente.findOne({
+            where: {cpf: request.body.cpf}
+        });
+
+        if (checkExistingCliente) {
+            const err =  new Error("Cpf já existe na base.");
+            err.statusCode = 409;
+            throw err;
+        }
+
+        if (request.body.cpf_regular === false) {
+            const err =  new Error("Usuário com cpf irregular, cadastro não efetuado.");
+            err.statusCode = 403;
+            throw err;
+        }
+        
+        const newCliente = await this.Cliente.create(request.body);
+
+        return newCliente;
+
     }
 
-    async searchID(request, response) {
-        try {
-            const id = request.params.id;
-            const details = request.query.details;
+    async #searchID(id, details = true) {
 
-            const cliente = await this.Cliente.findByPk(id, {
-                include: details === 'true' ? 
-                    [{model: this.Contrato},] :
+        const cliente = await this.Cliente.findByPk(id, {
+                include: details === true ? 
+                    [{
+                        model: this.Contrato,
+                        include: [{model: this.Cartao}]
+                    }] :
                     [],
             }
             );
 
-            if (!cliente) {
-                return response.status(404).json({error: 'Cliente não encontrado'})
-            }
+        if (!cliente) {
+            const err = new Error("Cliente não encontrado");
+            err.statusCode = 404;
+            throw err;
+        }
+
+        return cliente;
+    }
+
+    async #updateCliente(request) {
+
+        const id = request.body.id_cliente;
+
+        const cliente = await this.Cliente.findByPk(id);
+        if (!cliente) {
+            const err = new Error("Cliente não encontrado");
+            err.statusCode = 404;
+            throw err;
+        }
+
+        const isValidClienteAtivo = this.#validateClienteAtivo(request, cliente);
+        if (!isValidClienteAtivo) {
+            const err =  new Error("Cliente com o cpf irregular.");
+            err.statusCode = 400;
+            throw err;
+        }
+
+        const isValidCPF = await this.#verifyDuplicateCPF(request, cliente);
+        if (!isValidCPF) {
+            const err =  new Error("CPF em uso.");
+            err.statusCode = 409;
+            throw err;
+        }
+            
+        await cliente.update(request.body);
+
+        return cliente;
+    }
+
+    async #deleteCliente(id) {
+
+        const cliente = await this.Cliente.findByPk(id);
+        if (!cliente) {
+            const err = new Error("Cliente não encontrado");
+            err.statusCode = 404;
+            throw err;
+        }
+
+        await cliente.update({cliente_ativo: false});
+
+        const contratos_desativados = await this.#disableContratos(cliente.id_cliente);
+
+        return {cliente, contratos_desativados};
+    }
+
+    async listAllAPI(request, response) {
+        try {
+            const cpfCliente = request.query.cpf;
+            let details = true;
+            let clienteState = true;
+
+            if (request.query.ativo === 'false') clienteState = false;
+            if (request.query.details === 'false') details = false;
+
+            const clientes = await this.#listAll(clienteState, cpfCliente, details);
+
+            response.status(200).json(clientes);
+
+        } catch (error) {
+            if (error.statusCode === 404) return response.status(error.statusCode).json({error: error.message});
+
+            return response.status(500).json({ error: error.message});
+        }
+    }
+
+    async registerAPI(request, response) {
+        try {
+            
+            const newCliente = await this.#register(request);
+
+            return response.status(201).json({
+                message: 'Cliente cadastrado com sucesso',
+                cliente: newCliente,
+            });
+
+        } catch (error) {
+            if (error.statusCode === 403) return response.status(error.statusCode).json({error: error.message});
+            if (error.statusCode === 409) return response.status(error.statusCode).json({error: error.message});
+
+            return response.status(500).json({ error: error.message});
+        }
+    }
+
+    async searchIDAPI(request, response) {
+        try {
+            const id = request.params.id;
+            let details = true;
+
+            if (request.query.details === 'false') details = false;
+
+            const cliente = await this.#searchID(id, details);
 
             return response.status(200).json(cliente);
 
         } catch (error) {
-            response.status(500).json({error: error.message});
+            if (error.statusCode === 404) return response.status(error.statusCode).json({error: error.message});
+
+            return response.status(500).json({ error: error.message});
         }
     }
 
-    async updateCliente(request, response) {
+    async updateClienteAPI(request, response) {
         try {
-            const cliente = await this.Cliente.findByPk(request.body.id);
-            if (!cliente) {
-                return response.status(404).json({error: 'Cliente não encontrado'})
-            }
-
-            const isValidInput = await this.#validateInputs(request, response);
-            if (!isValidInput) return;
-
-            const isValidClienteAtivo = await this.#validateClienteAtivo(request, response, cliente);
-            if (!isValidClienteAtivo) return;
-
-            const isValidCPF = await this.#verifyDuplicateCPF(request, response, cliente);
-            if (!isValidCPF) return;
             
-            await cliente.update(request.body);
+            const updatedCliente = await this.#updateCliente(request);
 
             response.status(200).json({
                 message: "Cliente atualizado com sucesso",
-                cliente,
-            })
+                updatedCliente,
+            });
 
         } catch (error) {
-            response.status(500).json({error: error.message});
+            if (error.statusCode === 400) return response.status(error.statusCode).json({error: error.message});
+            if (error.statusCode === 404) return response.status(error.statusCode).json({error: error.message});
+            if (error.statusCode === 409) return response.status(error.statusCode).json({error: error.message});
+
+            return response.status(500).json({ error: error.message});
         }
     }
 
-    async deleteCliente(request, response) {
+    async deleteClienteAPI(request, response) {
         try {
-            const cliente = await this.Cliente.findByPk(request.params.id);
-            if (!cliente) {
-                return response.status(404).json({error: 'Cliente não encontrado'});
-            }
+            const id = request.params.id;
 
-            await cliente.update({cliente_ativo: false});
-
-            const contratos_desativados = await this.#disableContratos(cliente.id_cliente);
+            const {cliente, contratos_desativados} = await this.#deleteCliente(id);
 
             response.status(200).json({
                 message: 'Cliente e contratos atrelados desativados com sucesso',
+                cliente,
                 contratos_desativados
             });
             
         } catch (error) {
+            if (error.statusCode === 404) return response.status(error.statusCode).json({error: error.message});
+
             response.status(500).json({error: error.message});
+        }
+    }
+
+    async indexPage(request, response) {
+        try {
+            const activatedClientes = await this.#listAll(true, null, false);
+            const deactivatedClientes = await this.#listAll(false, null, false);
+
+            const clientes = [...activatedClientes, ...deactivatedClientes];
+
+            response.render("clientes/index", {
+                titulo: "Clientes",
+                alerta: false,
+                clientes,
+            });
+
+        } catch (error) {
+            response.render("500", {error});
+        }
+        
+    }
+
+    async registerPage(request, response) {
+        try {
+            response.render("clientes/create", { titulo: "Clientes" });
+        } catch (error) {
+            response.render("500", {error});
+        }
+    }
+
+    async viewPage(request, response) {
+        try {
+            const id = request.params.id;
+            const cliente = await this.#searchID(id);
+
+            response.render("clientes/read", {
+                titulo: "Clientes",
+                cliente,
+                });
+        } catch (error) {
+            if (error.statusCode === 404) return response.render("404", {error});
+            response.render("500", {error});
+        }
+    }
+
+    async editPage(request, response) {
+        try {
+            const id = request.params.id;
+            const cliente = await this.#searchID(id);
+
+            response.render("clientes/update", {
+                titulo: "Clientes",
+                cliente,
+            });
+        } catch (error) {
+            if (error.statusCode === 404) return response.render("404", {error});
+            response.render("500", {error});
+        }
+    }
+
+    async deletePage(request, response) {
+        try {
+            const id = request.params.id;
+            const {cliente, contratos_ativos} = await this.#deleteCliente(id);
+            
+            const activatedClientes = await this.#listAll(true, null, false);
+            const deactivatedClientes = await this.#listAll(false, null, false);
+
+            const clientes = [...activatedClientes, ...deactivatedClientes];
+
+            response.render("clientes/index", {
+                titulo: "Clientes",
+                alerta: true,
+                clientes,
+            });
+        } catch (error) {
+            if (error.statusCode === 404) return response.render("404", {error});
+            response.render("500", {error});
         }
     }
 }

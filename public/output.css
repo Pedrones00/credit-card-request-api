@@ -15,11 +15,8 @@
     --color-red-700: oklch(50.5% 0.213 27.518);
     --color-orange-500: oklch(70.5% 0.213 47.604);
     --color-amber-500: oklch(76.9% 0.188 70.08);
-    --color-yellow-50: oklch(98.7% 0.026 102.212);
-    --color-yellow-400: oklch(85.2% 0.199 91.936);
     --color-yellow-500: oklch(79.5% 0.184 86.047);
     --color-yellow-600: oklch(68.1% 0.162 75.834);
-    --color-yellow-800: oklch(47.6% 0.114 61.907);
     --color-green-50: oklch(98.2% 0.018 155.826);
     --color-green-100: oklch(96.2% 0.044 156.743);
     --color-green-300: oklch(87.1% 0.15 154.449);
@@ -686,9 +683,6 @@
   .border-transparent {
     border-color: transparent;
   }
-  .bg-amber-500 {
-    background-color: var(--color-amber-500);
-  }
   .bg-gray-50 {
     background-color: var(--color-gray-50);
   }
@@ -970,9 +964,6 @@
       --tw-ring-color: color-mix(in oklab, var(--color-black) 5%, transparent);
     }
   }
-  .ring-gray-300 {
-    --tw-ring-color: var(--color-gray-300);
-  }
   .ring-white\/10 {
     --tw-ring-color: color-mix(in srgb, #fff 10%, transparent);
     @supports (color: color-mix(in lab, red, red)) {
@@ -1069,34 +1060,6 @@
   .\[--anchor-gap\:--spacing\(2\)\] {
     --anchor-gap: calc(var(--spacing) * 2);
   }
-  .ring-inset {
-    --tw-ring-inset: inset;
-  }
-  .not-valid\:text-red-500\! {
-    &:not(*:valid) {
-      color: var(--color-red-500) !important;
-    }
-  }
-  .not-valid\:ring-red-500 {
-    &:not(*:valid) {
-      --tw-ring-color: var(--color-red-500);
-    }
-  }
-  .not-valid\:ring-red-500\! {
-    &:not(*:valid) {
-      --tw-ring-color: var(--color-red-500) !important;
-    }
-  }
-  .not-valid\:outline-red-500 {
-    &:not(*:valid) {
-      outline-color: var(--color-red-500);
-    }
-  }
-  .not-valid\:outline-red-500\! {
-    &:not(*:valid) {
-      outline-color: var(--color-red-500) !important;
-    }
-  }
   .group-focus\/item\:text-gray-500 {
     &:is(:where(.group\/item):focus *) {
       color: var(--color-gray-500);
@@ -1110,11 +1073,6 @@
   .placeholder\:text-gray-400 {
     &::placeholder {
       color: var(--color-gray-400);
-    }
-  }
-  .placeholder\:text-gray-400\! {
-    &::placeholder {
-      color: var(--color-gray-400) !important;
     }
   }
   .backdrop\:bg-transparent {
@@ -2063,13 +2021,6 @@
     @media (prefers-color-scheme: dark) {
       &::placeholder {
         color: var(--color-gray-500);
-      }
-    }
-  }
-  .dark\:placeholder\:text-gray-500\! {
-    @media (prefers-color-scheme: dark) {
-      &::placeholder {
-        color: var(--color-gray-500) !important;
       }
     }
   }

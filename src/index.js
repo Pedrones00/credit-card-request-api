@@ -19,15 +19,56 @@ app.listen(8000, function () {
 });
 
 // Simulação de um banco de dados
+const contratos = [
+  {
+    id_contrato: 1,
+    id_cliente: 1,
+    id_cartao: 1,
+    dt_inicio_vigencia: "2024-12-31",
+    dt_fim_vigencia: "2024-12-31",
+  },
+  {
+    id_contrato: 2,
+    id_cliente: 2,
+    id_cartao: 2,
+    dt_inicio_vigencia: "2024-12-31",
+    dt_fim_vigencia: "2025-08-22",
+  },
+  {
+    id_contrato: 3,
+    id_cliente: 3,
+    id_cartao: 3,
+    dt_inicio_vigencia: "2024-12-31",
+    dt_fim_vigencia: "2025-12-31",
+  },
+];
 const clientes = [
   {
     id_cliente: 1,
-    nome: "João da Silva",
+    nome: "João de Souza",
     cpf: "123.456.789-00",
     email: "email@dominio.com",
     dt_nascimento: "1990-01-01",
     cpf_regular: 0, // 1 se o CPF estiver regular, 0 se irregular
+    cliente_ativo: 0, // 1 se o cliente estiver ativo, 0 se inativo
+  },
+  {
+    id_cliente: 2,
+    nome: "Fulano de Tal",
+    cpf: "123.456.789-00",
+    email: "email@dominio.com",
+    dt_nascimento: "1990-01-01",
+    cpf_regular: 1, // 1 se o CPF estiver regular, 0 se irregular
     cliente_ativo: 1, // 1 se o cliente estiver ativo, 0 se inativo
+  },
+  {
+    id_cliente: 3,
+    nome: "Maria da Silva",
+    cpf: "123.456.789-00",
+    email: "email@dominio.com",
+    dt_nascimento: "1990-01-01",
+    cpf_regular: 1, // 1 se o CPF estiver regular, 0 se irregular
+    cliente_ativo: 0, // 1 se o cliente estiver ativo, 0 se inativo
   },
 ];
 const cartoes = [
@@ -37,6 +78,8 @@ const cartoes = [
     tipo: "credito", // "credito" ou "debito"
     bandeira: "Elo",
     anuidade: 299.99,
+    dt_inicio_vigencia: "2024-12-31",
+    dt_fim_vigencia: "",
   },
   {
     id_cartao: 2,
@@ -44,6 +87,8 @@ const cartoes = [
     tipo: "debito", // "credito" ou "debito"
     bandeira: "Visa",
     anuidade: 499.99,
+    dt_inicio_vigencia: "2024-12-31",
+    dt_fim_vigencia: "",
   },
   {
     id_cartao: 3,
@@ -51,6 +96,8 @@ const cartoes = [
     tipo: "debito", // "credito" ou "debito"
     bandeira: "Mastercard",
     anuidade: 575.0,
+    dt_inicio_vigencia: "2024-12-31",
+    dt_fim_vigencia: "",
   },
 ];
 
@@ -77,6 +124,17 @@ app.get("/clientes", (request, response) => {
   });
 });
 
+// Rota para visualizar todos os clientes registrados
+app.get("/contratos", (request, response) => {
+  response.render("contratos/index", {
+    titulo: "Contratos",
+    alerta: false,
+    cartoes,
+    clientes,
+    contratos,
+  });
+});
+
 // Rota para cadastrar um novo cartão
 app.get("/cartoes/cadastrar", (request, response) => {
   response.render("cartoes/create", { titulo: "Cartões" });
@@ -85,6 +143,15 @@ app.get("/cartoes/cadastrar", (request, response) => {
 // Rota para cadastrar um novo cliente
 app.get("/clientes/cadastrar", (request, response) => {
   response.render("clientes/create", { titulo: "Clientes" });
+});
+
+// Rota para cadastrar um novo contrato
+app.get("/contratos/cadastrar", (request, response) => {
+  response.render("contratos/create", {
+    titulo: "Contratos",
+    cartoes,
+    clientes,
+  });
 });
 
 // Rota para visualizar os dados de um cartão

@@ -14,9 +14,9 @@
 
 ## Contratos
 
-[] Permitir que um cliente contrate um cartão disponível.
+[] Permitir que um cliente contrate um cartão disponível
 
-[] Registrar a data da contratação e o status (ativo, cancelado.
+[x] Registrar a data da contratação e o status (ativo, cancelado).
 
 [] Permitir a visualização dos cartões contratados por cada cliente.
 
@@ -39,3 +39,5 @@
 [ ] Selecionar tipo de cartão com crédito e débito ao mesmo tempo
 
 [ ] Páginação
+
+[] Filtro de ativos/inativos nos index

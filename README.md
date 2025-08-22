@@ -69,7 +69,7 @@ erDiagram
     CONTRATO {
         INT id_contrato PK
         INT id_cliente FK
-        INT id_cartap FK
+        INT id_cartao FK
         DATE dt_inicio_vigencia
         DATE dt_fim_vigencia
     }

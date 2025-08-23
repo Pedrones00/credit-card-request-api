@@ -1,9 +1,10 @@
 import { Op } from 'sequelize';
 
 class CartaoController {
-    constructor(CartaoModel, ContratoModel) {
+    constructor(CartaoModel, ContratoModel, ClienteModel) {
         this.Cartao = CartaoModel;
         this.Contrato = ContratoModel;
+        this.Cliente = ClienteModel;
     }
 
     #getToday(){
@@ -11,30 +12,26 @@ class CartaoController {
         return today;
     }
 
-    async #getActiveCards() {
-        let today = this.#getToday();
+    #getActiveCardsFilter() {
+        const today = this.#getToday();
 
-        const cartoes = await this.Cartao.findAll({
-            where: {
-                    dt_fim_vigencia: {
+        const filter = {
+            dt_fim_vigencia: {
                         [Op.gte]: today,
                     },
                     dt_inicio_vigencia: {
                         [Op.lte]: today
                     }
-            }
-        });
+        }
 
-        return cartoes;
+        return filter;
     }
 
-    async #getDeactiveCards() {
-        let today = this.#getToday();
+    #getDeactiveCardsFilter() {
+        const today = this.#getToday();
 
-        const cartoes = await this.Cartao.findAll({
-            where: {
-                [Op.or]:
-                    [
+        const filter = {
+            [Op.or]: [
                         {
                             dt_fim_vigencia: {
                                 [Op.lt]: today,
@@ -46,10 +43,42 @@ class CartaoController {
                             }
                         }
                     ]
-            }
-        });
+        }
 
-        return cartoes;
+        return filter;
+    }
+
+    #createSequelizeIncludeArrays (detailsContrato, detailsCliente) {
+        
+        let arrayInclude = [];
+
+        if (detailsContrato) {
+            const contratoInclude = {
+                model: this.Contrato,
+            };
+            if (detailsCliente) contratoInclude.include = [{model: this.Cliente}];
+
+            arrayInclude.push(contratoInclude);
+
+        } else if (detailsCliente) {
+            const contratoInclude = {
+                model: this.Contrato,
+                attributes: ['id_contrato']
+            };
+            if (detailsCliente) contratoInclude.include = [{model: this.Cliente}];
+            arrayInclude.push(contratoInclude);
+        }
+
+        return arrayInclude;
+    }
+
+    #validateInputs(request) {
+
+        if (request.body && request.body.nome && request.body.tipo && request.body.bandeira) {
+            return true;
+        }
+
+        return false;
     }
 
     async #disableContratos(id_cartao) {
@@ -71,52 +100,47 @@ class CartaoController {
         return contratos_ativos;
     }
 
-    #validateInputs(request) {
+    async #listAll(cartaoState = true, detailsContrato = false, detailsCliente = true) {
 
-        if (request.body && request.body.nome && request.body.tipo && request.body.bandeira) {
-            return true;
-        }
-
-        return false;
-
-    }
-
-    async #listAll(request) {
-
-        let cartoes = null;
-
-        if (request.query.ativo === 'false') {
-            cartoes = await this.#getDeactiveCards();
-        } else {
-            cartoes = await this.#getActiveCards();
-        }
+        const cartoes = await this.Cartao.findAll({
+            where: cartaoState === true ? this.#getActiveCardsFilter() : this.#getDeactiveCardsFilter(),
+            include: this.#createSequelizeIncludeArrays(detailsContrato, detailsCliente),
+        });
 
         return cartoes;
-
     }
 
-    async #searchID(id) {
-        const cartao = await this.Cartao.findByPk(id);
+    async #searchID(id, detailsContrato = false, detailsCliente = true) {
+
+        const cartao = await this.Cartao.findByPk(id, {
+            include: this.#createSequelizeIncludeArrays(detailsContrato, detailsCliente),
+        });
+
+        if (!cartao) {
+            const err = new Error("Cartão não encontrado");
+            err.statusCode = 404;
+            throw err;
+        }
 
         return cartao;
     }
 
     async #register(request) {
 
-            const isValidInput = this.#validateInputs(request);
-            if (!isValidInput) {
-                const err =  new Error("Campos obrigatórios não preenchidos!");
-                err.statusCode = 400;
-                throw err;
-            }
+        const isValidInput = this.#validateInputs(request);
+        if (!isValidInput) {
+            const err =  new Error("Campos obrigatórios não preenchidos!");
+            err.statusCode = 400;
+            throw err;
+        }
 
-            const newCartao = await this.Cartao.create(request.body);
-            return newCartao;
+        const newCartao = await this.Cartao.create(request.body);
+        return newCartao;
     }
 
     async #updateCartao(request) {
         const id = request.body.id;
-        const cartao = await this.#searchID(id);
+        const cartao = await this.#searchID(id, false, false);
         if (!cartao) {
             const err = new Error("Cartão não encontrado");
             err.statusCode = 404;
@@ -146,7 +170,16 @@ class CartaoController {
 
     async listAllAPI(request, response) {
         try {
-            const cartoes = await this.#listAll(request);
+            const arrayQueryDetails = Array.isArray(request.query.details) ? [...request.query.details] : [request.query.details];
+            let cartaoState = true;
+            let detailsContrato = false;
+            let detailsCliente = false;
+
+            if (request.query.active === 'false') cartaoState = false;
+            if (arrayQueryDetails.includes('contrato')) detailsContrato = true;
+            if (arrayQueryDetails.includes('cliente')) detailsCliente = true;
+
+            const cartoes = await this.#listAll(cartaoState, detailsContrato, detailsCliente);
 
             return response.status(200).json(cartoes);
             
@@ -158,11 +191,14 @@ class CartaoController {
     async searchIDAPI(request, response) {
         try {
             const id = request.params.id;
-            const cartao = await this.#searchID(id);
+            const arrayQueryDetails = Array.isArray(request.query.details) ? [...request.query.details] : [request.query.details];
+            let detailsContrato = false;
+            let detailsCliente = false;
 
-            if (!cartao) {
-                return response.status(404).json({error: "Cartão não encontrado"});
-            }
+            if (arrayQueryDetails.includes('contrato')) detailsContrato = true;
+            if (arrayQueryDetails.includes('cliente')) detailsCliente = true;
+
+            const cartao = await this.#searchID(id, detailsContrato, detailsCliente);
 
             return response.status(200).json(cartao);
 
@@ -221,9 +257,9 @@ class CartaoController {
 
     async indexPage(request, response) {
         try {
-            const cartoes = await this.#listAll(request);
+            const cartoes = await this.#listAll(true, false, false);
 
-            response.render("cartoes", {
+            response.render("cartoes/index", {
                 titulo: "Cartões",
                 alerta: false,
                 cartoes,
@@ -235,7 +271,7 @@ class CartaoController {
 
     async registerPage(request, response) {
         try {
-            response.render("cadastrar_cartao", { titulo: "Cartões" });
+            response.render("cartoes/create", { titulo: "Cartões" });
         } catch (error) {
             response.render("500", {error});
         }
@@ -244,9 +280,9 @@ class CartaoController {
     async viewPage(request, response) {
         try {
             const id = request.params.id;
-            const cartao = await this.#searchID(id);
+            const cartao = await this.#searchID(id, false, false);
 
-            response.render("visualizar_cartao", {
+            response.render("cartoes/read", {
                 titulo: "Cartões",
                 cartao,
             });
@@ -260,7 +296,7 @@ class CartaoController {
             const id = request.params.id
             const cartao = await this.#searchID(id);
 
-            response.render("editar_cartao", {
+            response.render("cartoes/update", {
                 titulo: "Cartões",
                 cartao,
             });
@@ -275,9 +311,9 @@ class CartaoController {
 
             const {cartao, contratos_desativados} = await this.#deleteCartao(id);
 
-            const cartoes = await this.#listAll(request);
+            const cartoes = await this.#listAll(true, false, false);
 
-            response.render("cartoes", {
+            response.render("cartoes/index", {
                 titulo: "Cartões",
                 alerta: true,
                 cartoes,

@@ -12,12 +12,63 @@ class ContratoController {
         return today;
     }
 
-    async #validateInputs(request, response) {
-        if (request.body.id_cartao && request.body.id_cliente) {
+    #getActiveContratosFilter() {
+        const today = this.#getToday();
+
+        const filter = {
+            dt_fim_vigencia: {
+                        [Op.gte]: today,
+                    },
+                    dt_inicio_vigencia: {
+                        [Op.lte]: today
+                    }
+        }
+
+        return filter;
+    }
+
+    #getDeactiveContratosFilter() {
+        const today = this.#getToday();
+
+        const filter = {
+            [Op.or]: [
+                        {
+                            dt_fim_vigencia: {
+                                [Op.lt]: today,
+                            }
+                        },
+                        {
+                            dt_inicio_vigencia: {
+                                [Op.gt]: today
+                            }
+                        }
+                    ]
+        }
+
+        return filter;
+    }
+
+    #createSequelizeIncludeArrays (detailsCliente, detailsCartao) {
+        
+        let arrayInclude = [];
+
+        if (detailsCliente) {
+            arrayInclude.push({model: this.Cliente});
+        }
+        
+        if (detailsCartao) {
+            arrayInclude.push({model: this.Cartao});
+        }
+
+        return arrayInclude;
+    }
+
+    #validateInputs(request) {
+
+        if (request.body && request.body.id_cartao && request.body.id_cliente) {
             return true;
         }
 
-        response.status(400).json({error: 'Campos obrigatórios não preenchidos'});
         return false;
     }
 
@@ -64,9 +115,6 @@ class ContratoController {
         const today = this.#getToday();
         const dt_inicio_vigencia = new Date(cartao.dt_inicio_vigencia).toISOString();
         const dt_fim_vigencia = new Date(cartao.dt_fim_vigencia).toISOString();
-
-        console.log(today, dt_inicio_vigencia, dt_fim_vigencia);
-        console.log(cartao);
         
         if (dt_inicio_vigencia > today || dt_fim_vigencia < today) {
             return false;
@@ -75,31 +123,135 @@ class ContratoController {
         return true;
     }
 
-    async #validateCartaoCliente(response, id_cartao, id_cliente) {
+    async #validateCartaoCliente(id_cartao, id_cliente) {
 
         const isValidCartao = await this.#validateCartao(id_cartao);
         const isValidCliente = await this.#validateCliente(id_cliente);
         
         if (!isValidCartao || !isValidCliente) {
-            let errors = [];
+            let errorsMessage = [];
 
-            if (!isValidCartao) errors.push('Cartao inválido');
-            if (!isValidCliente) errors.push('Cliente inválido');
+            if (!isValidCartao) errorsMessage.push('Cartao inválido');
+            if (!isValidCliente) errorsMessage.push('Cliente inválido');
 
-            response.status(400).json({error : errors});
-            return false;
+            const err =  new Error(errorsMessage);
+            err.statusCode = 400;
+            throw err;
         }
-        
-        return true;
-
     }
 
-    async listAll(request, response) {
-        try {
-            const details = request.query.details;
-            const actives = request.query.actives;
+    async #listAll(contratoState = true, detailsCliente = false, detailsCartao = false) {
+        
+        const contratos = await this.Contrato.findAll({
+                where : contratoState === true ? this.#getActiveContratosFilter() : this.#getDeactiveContratosFilter(),
+                include: this.#createSequelizeIncludeArrays(detailsCliente, detailsCartao),
+            });
 
-            const contratos = await this.#getContracts(actives, details);
+        return contratos;
+    }
+
+    async #searchID(id, detailsCliente = false, detailsCartao = false) {
+        const contrato = await this.Contrato.findByPk(id, {
+            include: this.#createSequelizeIncludeArrays(detailsCliente, detailsCartao),
+        });
+
+        if (!contrato) {
+            const err = new Error("Contrato não encontrado");
+            err.statusCode = 404;
+            throw err;
+        }
+
+        return contrato;
+    }
+
+    async #register(request) {
+        const isValidInput = this.#validateInputs(request);
+        if (!isValidInput) {
+            const err =  new Error("Campos obrigatórios não preenchidos!");
+            err.statusCode = 400;
+            throw err;
+        }
+
+        await this.#validateCartaoCliente(request.body.id_cartao, request.body.id_cliente);
+        
+        const newContrato = await this.Contrato.create(request.body);
+
+        return newContrato;
+    }
+
+    async #update(request) {
+
+        const id_contrato = request.body.id_contrato;
+        const id_cartao = request.body.id_cartao;
+        const id_cliente = request.body.id_cliente;
+
+        const contrato = await this.Contrato.findByPk(id_contrato);
+        if (!contrato) {
+            const err = new Error("Contrato não encontrado.");
+            err.statusCode = 404;
+            throw err;
+        }
+            
+        if (id_cartao) {
+            const isValidCartao = await this.#validateCartao(id_cartao);
+            if (!isValidCartao) {
+                const err = new Error("Cartão inválido.");
+                err.statusCode = 400;
+                throw err;
+            }
+        }
+
+        if (id_cliente) {
+            const isValidCliente = await this.#validateCliente(id_cliente);
+            if (!isValidCliente) {
+                const err = new Error("Cliente inválido.");
+                err.statusCode = 400;
+                throw err;
+            }
+        }
+            
+        await contrato.update(request.body);
+
+        return contrato;
+    }
+
+    async #delete(id_contrato) {
+        const contrato = await this.Contrato.findByPk(id_contrato);
+        if (!contrato) {
+            const err = new Error("Contrato não encontrado.");
+            err.statusCode = 404;
+            throw err;
+        }
+        
+        const today = this.#getToday();
+        const dateEndContrato = new Date(contrato.dt_fim_vigencia).toISOString();
+
+        if (dateEndContrato <= today) {
+            const err = new Error("Contrato já está desativado.");
+            err.statusCode = 400;
+            throw err;
+        }
+
+        await contrato.update({
+            dt_fim_vigencia: today
+        });
+
+        return contrato;
+    }
+
+    async listAllAPI(request, response) {
+        try {
+
+            const arrayQueryDetails = Array.isArray(request.query.details) ? [...request.query.details] : [request.query.details];
+            let contratoState = true;
+            let detailsCartao = false;
+            let detailsCliente = false;
+
+            if (request.query.active === 'false') contratoState = false;
+            if (arrayQueryDetails.includes('cartao')) detailsCartao = true;
+            if (arrayQueryDetails.includes('cliente')) detailsCliente = true;
+
+            const contratos = await this.#listAll(contratoState, detailsCliente, detailsCartao);
 
             response.status(200).json(contratos);
 
@@ -108,20 +260,18 @@ class ContratoController {
         }
     }
 
-    async searchID(request, response) {
+    async searchIDAPI(request, response) {
         try {
-            const id = request.params.id_contrato;
+            const id_contrato = request.params.id;
 
-            const contrato = await this.Contrato.findByPk(id, {
-                include: [
-                    {model: this.Cliente},
-                    {model: this.Cartao},
-                ]
-            });
+            const arrayQueryDetails = Array.isArray(request.query.details) ? [...request.query.details] : [request.query.details];
+            let detailsCartao = false;
+            let detailsCliente = false;
 
-            if (!contrato) {
-                return response.status(404).json({error: 'Contrato não encontrado'});
-            }
+            if (arrayQueryDetails.includes('cartao')) detailsCartao = true;
+            if (arrayQueryDetails.includes('cliente')) detailsCliente = true;
+
+            const contrato = await this.#searchID(id_contrato, detailsCliente, detailsCartao);
 
             response.status(200).json(contrato);
 
@@ -130,15 +280,10 @@ class ContratoController {
         }
     }
 
-    async register(request, response) {
+    async registerAPI(request, response) {
         try {
-            const isValidInput = await this.#validateInputs(request, response);
-            if (!isValidInput) return;
-
-            const isValidClienteCartao = await this.#validateCartaoCliente(response, request.body.id_cartao, request.body.id_cliente);
-            if (!isValidClienteCartao) return;
             
-            const newContrato = await this.Contrato.create(request.body);
+            const newContrato = await this.#register(request);
 
             response.status(201).json(newContrato);
 
@@ -147,35 +292,10 @@ class ContratoController {
         }
     }
 
-    async update(request, response) {
+    async updateAPI(request, response) {
         try {
-            const id_contrato = request.body.id_contrato;
-            const id_cartao = request.body.id_cartao;
-            const id_cliente = request.body.id_cliente;
 
-            const contrato = await this.Contrato.findByPk(id_contrato);
-            if (!contrato) {
-                response.status(400).json({error: 'Contrato Inválido'});
-                return;
-            }
-            
-            if (id_cartao) {
-                const isValidCartao = await this.#validateCartao(id_cartao);
-                if (!isValidCartao) {
-                    response.status(400).json({error : "Cartão inválido."});
-                    return;
-                }
-            }
-
-            if (id_cliente) {
-                const isValidCliente = await this.#validateCliente(id_cliente);
-                if (!isValidCliente) {
-                    response.status(400).json({error : "Cliente inválido."});
-                    return;
-                }
-            }
-            
-            await contrato.update(request.body);
+            const contrato = await this.#update(request);
 
             response.status(200).json({
                 message: "Contrato atualizado com sucesso",
@@ -187,31 +307,16 @@ class ContratoController {
         }
     }
 
-    async delete(request, response) {
+    async deleteAPI(request, response) {
         try {
-            const id_contrato = request.body.id_contrato;
-            const contrato = await this.Contrato.findByPk(id_contrato);
-            if (!contrato) {
-                response.status(400).json({error: 'Contrato Inválido'});
-                return;
-            }
-            
-            const today = this.#getToday();
-            const dateEndContrato = new Date(contrato.dt_fim_vigencia).toISOString();
+            const id_contrato = request.params.id;
 
-            if (dateEndContrato <= today) {
-                response.status(400).json({error : 'Contrato já está desativado.'});
-                return;
-            }
-
-            await contrato.update({
-                dt_fim_vigencia: today
-            });
+            const contrato = await this.#delete(id_contrato);
 
             response.status(200).json({
                 message: "Contrato estará desabilidado a partir de amanhã.",
                 contrato,
-            })
+            });
 
 
         } catch (error) {

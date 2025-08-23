@@ -27,6 +27,30 @@ class ClienteController {
         return true;
     }
 
+    #createSequelizeIncludeArrays (detailsContrato, detailsCartao) {
+        
+        let arrayInclude = [];
+
+        if (detailsContrato) {
+            const contratoInclude = {
+                model: this.Contrato,
+            };
+            if (detailsCartao) contratoInclude.include = [{model: this.Cartao}];
+
+            arrayInclude.push(contratoInclude);
+
+        } else if (detailsCartao) {
+            const contratoInclude = {
+                model: this.Contrato,
+                attributes: ['id_contrato']
+            };
+            if (detailsCartao) contratoInclude.include = [{model: this.Cartao}];
+            arrayInclude.push(contratoInclude);
+        }
+
+        return arrayInclude;
+    }
+
     async #verifyDuplicateCPF (request, cliente) {
         const cpfRequest = request.body.cpf;
         let cpfInUse = null;
@@ -61,19 +85,16 @@ class ClienteController {
             return contratos_ativos;
         }
 
-    async #listAll(clienteState = true, cpfCliente = null, details = true) {
+    async #listAll(clienteState = true, cpfCliente = null, detailsContrato = false, detailsCartao = false) {
+
+
 
         const clientes = await this.Cliente.findAll({
                 where: {
                     cliente_ativo: clienteState,
                     ...(cpfCliente ? {cpf: cpfCliente} : {}) 
                 },
-                include: details === true ? 
-                    [{
-                        model: this.Contrato,
-                        include: [{model: this.Cartao}]
-                    }] :
-                    [],
+                include: this.#createSequelizeIncludeArrays(detailsContrato, detailsCartao)
             });
 
         if (!clientes && cpfCliente) {
@@ -116,15 +137,10 @@ class ClienteController {
 
     }
 
-    async #searchID(id, details = true) {
+    async #searchID(id, detailsContrato = false, detailsCartao = false) {
 
         const cliente = await this.Cliente.findByPk(id, {
-                include: details === true ? 
-                    [{
-                        model: this.Contrato,
-                        include: [{model: this.Cartao}]
-                    }] :
-                    [],
+                include: this.#createSequelizeIncludeArrays(detailsContrato, detailsCartao),
             }
             );
 
@@ -186,13 +202,16 @@ class ClienteController {
     async listAllAPI(request, response) {
         try {
             const cpfCliente = request.query.cpf;
-            let details = true;
+            const arrayQueryDetails = Array.isArray(request.query.details) ? [...request.query.details] : [request.query.details];
             let clienteState = true;
+            let detailsContrato = false;
+            let detailsCartao = false;
 
-            if (request.query.ativo === 'false') clienteState = false;
-            if (request.query.details === 'false') details = false;
+            if (request.query.active === 'false') clienteState = false;
+            if (arrayQueryDetails.includes('contrato')) detailsContrato = true;
+            if (arrayQueryDetails.includes('cartao')) detailsCartao = true;
 
-            const clientes = await this.#listAll(clienteState, cpfCliente, details);
+            const clientes = await this.#listAll(clienteState, cpfCliente, detailsContrato, detailsCartao);
 
             response.status(200).json(clientes);
 
@@ -224,11 +243,14 @@ class ClienteController {
     async searchIDAPI(request, response) {
         try {
             const id = request.params.id;
-            let details = true;
+            const arrayQueryDetails = Array.isArray(request.query.details) ? [...request.query.details] : [request.query.details];
+            let detailsContrato = false;
+            let detailsCartao = false;
 
-            if (request.query.details === 'false') details = false;
+            if (arrayQueryDetails.includes('contrato')) detailsContrato = true;
+            if (arrayQueryDetails.includes('cartao')) detailsCartao = true;
 
-            const cliente = await this.#searchID(id, details);
+            const cliente = await this.#searchID(id, detailsContrato, detailsCartao);
 
             return response.status(200).json(cliente);
 
@@ -279,8 +301,8 @@ class ClienteController {
 
     async indexPage(request, response) {
         try {
-            const activatedClientes = await this.#listAll(true, null, false);
-            const deactivatedClientes = await this.#listAll(false, null, false);
+            const activatedClientes = await this.#listAll(true, null, false, false);
+            const deactivatedClientes = await this.#listAll(false, null, false, false);
 
             const clientes = [...activatedClientes, ...deactivatedClientes];
 
@@ -307,7 +329,7 @@ class ClienteController {
     async viewPage(request, response) {
         try {
             const id = request.params.id;
-            const cliente = await this.#searchID(id);
+            const cliente = await this.#searchID(id, false, false);
 
             response.render("clientes/read", {
                 titulo: "Clientes",
@@ -322,7 +344,7 @@ class ClienteController {
     async editPage(request, response) {
         try {
             const id = request.params.id;
-            const cliente = await this.#searchID(id);
+            const cliente = await this.#searchID(id, false, false);
 
             response.render("clientes/update", {
                 titulo: "Clientes",
@@ -339,8 +361,8 @@ class ClienteController {
             const id = request.params.id;
             const {cliente, contratos_ativos} = await this.#deleteCliente(id);
             
-            const activatedClientes = await this.#listAll(true, null, false);
-            const deactivatedClientes = await this.#listAll(false, null, false);
+            const activatedClientes = await this.#listAll(true, null, false, false);
+            const deactivatedClientes = await this.#listAll(false, null, false, false);
 
             const clientes = [...activatedClientes, ...deactivatedClientes];
 

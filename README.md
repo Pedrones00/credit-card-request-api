@@ -2,6 +2,23 @@
 
 Neste Tech Challenge fomos desafiados a criar um sistema que gerencie cartões, clientes e contratos.
 
+## 📄 Sumário
+
+- [👨‍💻 Tech Challenge](#-tech-challenge)
+  - [📄 Sumário](#-sumário)
+  - [✅ Tecnologias utilizadas](#-tecnologias-utilizadas)
+    - [🎨 Front-end](#-front-end)
+    - [👾 Back-end](#-back-end)
+  - [🏗️ Arquitetura de software](#️-arquitetura-de-software)
+    - [📂 Estrutura do repositório](#-estrutura-do-repositório)
+  - [💾 Modelos de dados](#-modelos-de-dados)
+  - [🔧 Instalação e Configuração](#-instalação-e-configuração)
+  - [📚 Documentação da API](#-documentação-da-api)
+  - [📲 Endpoints Disponíveis](#-endpoints-disponíveis)
+    - [💳 Cartões (`/api/cartoes`)](#-cartões-apicartoes)
+    - [👥 Clientes (`/api/clientes`)](#-clientes-apiclientes)
+    - [✍️ Contratos (`/api/contratos`)](#️-contratos-apicontratos)
+
 ## ✅ Tecnologias utilizadas
 
 Para desenvolver esse sistema utilizamos as seguintes tecnologias:
@@ -109,10 +126,14 @@ http://localhost:3000/api/docs
 
 ## 📲 Endpoints Disponíveis
 
-### Clientes (`/api/v1/users`)
+### 💳 Cartões (`/api/cartoes`)
 
-- `POST /` - Criar usuário
-- `GET /` - Listar usuários (com paginação)
-- `GET /:id` - Buscar usuário por ID
-- `PATCH /:id` - Atualizar usuário
-- `DELETE /:id` - Remover usuário
+- `GET /` - Listar cartões
+
+### 👥 Clientes (`/api/clientes`)
+
+- `GET /` - Listar clientes
+
+### ✍️ Contratos (`/api/contratos`)
+
+- `GET /` - Listar contratos

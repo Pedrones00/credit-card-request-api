@@ -137,7 +137,7 @@
                                         <dt class="text-gray-500 dark:text-gray-400">Cartão</dt>
                                         <dd class="text-gray-700 dark:text-gray-300 line-clamp-1">
                                             <a href="/cartoes/visualizar/<%= contrato.id_cartao %>">
-                                                <%= cartoes.find(cartao=> cartao.id_cartao === contrato.id_cartao)?.nome || 'Cartão não encontrado' %>
+                                                <%= contrato.cartao.nome %>
                                             </a>
                                         </dd>
                                     </div>
@@ -145,7 +145,7 @@
                                         <dt class="text-gray-500 dark:text-gray-400">Cliente</dt>
                                         <dd class="text-gray-700 dark:text-gray-300 line-clamp-1">
                                             <a href="/clientes/visualizar/<%= contrato.id_cliente %>">
-                                                <%= clientes.find(cliente=> cliente.id_cliente === contrato.id_cliente)?.nome || 'Cliente não encontrado' %>
+                                                <%= contrato.cliente.nome %>
                                             </a>
                                         </dd>
                                     </div>

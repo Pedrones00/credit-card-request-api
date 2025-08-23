@@ -43,7 +43,7 @@
                             <div>
                                 <label for="cliente" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Cliente</label>
                                 <el-autocomplete class="relative mt-2 block">
-                                    <input value="<%= clientes.find(cliente=> cliente.id_cliente === contrato.id_cliente)?.nome || 'Cliente não encontrado' %>" id="cliente" type="text" class="block w-full rounded-md bg-white py-1.5 pr-12 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500" required />
+                                    <input value="<%= contrato.cliente.nome %>" id="cliente" type="text" class="block w-full rounded-md bg-white py-1.5 pr-12 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500" required />
                                     <button type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2">
                                         <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 text-gray-400">
                                             <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
@@ -64,7 +64,7 @@
                             <div>
                                 <label for="cartao" class="block mt-8 text-sm/6 font-medium text-gray-900 dark:text-white">Cartão</label>
                                 <el-autocomplete class="relative mt-2 block">
-                                    <input value="<%= cartoes.find(cartao=> cartao.id_cartao === contrato.id_cartao)?.nome || 'Cartão não encontrado' %>" id="cartao" type="text" class="block w-full rounded-md bg-white py-1.5 pr-12 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500" required />
+                                    <input value="<%= contrato.cartao.nome %>" id="cartao" type="text" class="block w-full rounded-md bg-white py-1.5 pr-12 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500" required />
                                     <button type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2">
                                         <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 text-gray-400">
                                             <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />

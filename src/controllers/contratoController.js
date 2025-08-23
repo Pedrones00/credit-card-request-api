@@ -72,25 +72,31 @@ class ContratoController {
         return false;
     }
 
-    async #getContracts(actives = 'true', details = 'true') {
+    async #getActiveClientes(){
+        const clientes = await this.Cliente.findAll({
+                where: {
+                    cliente_ativo: true,
+                }
+            });
 
+        return clientes;
+    }
+
+    async #getActiveCartoes(){
         const today = this.#getToday();
-        
-        const contratos = await this.Contrato.findAll({
-                where : actives === 'true' ?
-                    {
-                        dt_inicio_vigencia: { [Op.lte] : today},
-                        dt_fim_vigencia: {[Op.gte] : today}
-                    } :
-                    {}
-                ,
-                include: details === 'true' ? 
-                    [{model: this.Cliente},
-                    {model: this.Cartao},] :
-                    [], 
-                });
 
-        return contratos;
+        const cartoes = await this.Cartao.findAll({
+            where: {
+                dt_fim_vigencia: {
+                            [Op.gte]: today,
+                        },
+                        dt_inicio_vigencia: {
+                            [Op.lte]: today
+                        }
+            }
+        });
+
+        return cartoes;
     }
 
     async #validateCliente (id_cliente) {
@@ -321,6 +327,99 @@ class ContratoController {
 
         } catch (error) {
             response.status(500).json({error: error.message});
+        }
+    }
+
+    async indexPage(request, response) {
+        try {
+            const activatedContrato = await this.#listAll(true, true, true);
+            const deactivatedContrato = await this.#listAll(false, true, true);
+
+            const contratos = [...activatedContrato, ...deactivatedContrato];
+
+            response.render("contratos/index", {
+                titulo: "Contratos",
+                alerta: false,
+                contratos,
+            });
+        } catch (error) {
+            response.render("500", {titulo: 'Erro!', error});
+        }
+    }
+
+    async registerPage(request, response) {
+        try {
+            const cartoes = await this.#getActiveCartoes();
+            const clientes = await this.#getActiveClientes();
+
+            response.render("contratos/create", {
+                titulo: "Contratos",
+                cartoes,
+                clientes,
+            });
+        } catch (error) {
+            response.render("500", {titulo: 'Erro!', error});
+        }
+    }
+
+    async viewPage(request, response) {
+        try {
+            const id = request.params.id;
+            const contrato = await this.#searchID(id, true, true);
+            const cartoes = await this.#getActiveCartoes();
+            const clientes = await this.#getActiveClientes();
+
+            response.render("contratos/read", {
+                titulo: "Contratos",
+                contrato,
+                cartoes,
+                clientes,
+            });
+
+        } catch (error) {
+            if (error.statusCode === 404) return response.status(404).render("404");
+            response.render("500", {titulo: 'Erro!', error});
+        }
+    }
+
+    async editPage(request, response) {
+        try {
+            const id = request.params.id;
+            const contrato = await this.#searchID(id, true, true);
+            const cartoes = await this.#getActiveCartoes();
+            const clientes = await this.#getActiveClientes();
+
+            response.render("contratos/update", {
+                titulo: "Contratos",
+                contrato,
+                cartoes,
+                clientes,
+            });
+
+        } catch (error) {
+            if (error.statusCode === 404) return response.status(404).render("404");
+            response.render("500", {titulo: 'Erro!', error});
+        }
+    }
+
+    async deletePage(request, response) {
+        try {
+            const id = request.params.id;
+            await this.#delete(id);
+            
+            const activatedContrato = await this.#listAll(true, true, true);
+            const deactivatedContrato = await this.#listAll(false, true, true);
+
+            const contratos = [...activatedContrato, ...deactivatedContrato];
+
+            response.render("contratos/index", {
+                titulo: "Contratos",
+                alerta: true,
+                contratos
+            });
+        } catch (error) {
+            if (error.statusCode === 404) return response.status(404).render("404");
+            response.render("500", {titulo: 'Erro!', error});
         }
     }
 }

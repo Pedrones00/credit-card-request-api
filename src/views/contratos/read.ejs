@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="h-full">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" sizes="any">
+    <title>
+        <%= titulo %>
+    </title>
+    <link href="/output.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindplus/elements@1" type="module"></script>
+</head>
+
+
+<body class="h-full bg-gray-50 dark:bg-gray-900">
+
+    <%- include('../partials/header') %>
+
+        <main class="py-10 lg:pl-72">
+            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+                <div class="mx-auto max-w-3xl">
+                    <h2 class="font-medium text-xl text-gray-500 dark:text-white">Visualização de dados do contrato</h2>
+
+                    <form class="bg-white rounded-lg max-w-2xl shadow-xs outline outline-gray-900/5 sm:rounded-xl md:col-span-2 dark:bg-gray-800/50 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10 mt-3">
+                        <!-- Form fields -->
+                        <div class="px-4 py-6 sm:p-8">
+                            <!-- Cliente -->
+                            <div>
+                                <label for="cliente" class="block text-sm/6 font-medium text-gray-900 dark:text-white">Cliente</label>
+                                <el-autocomplete class="relative mt-2 block">
+                                    <input value="<%= clientes.find(cliente=> cliente.id_cliente === contrato.id_cliente)?.nome || 'Cliente não encontrado' %>" id="cliente" type="text" class="block w-full rounded-md bg-white py-1.5 pr-12 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:outline-gray-200 dark:disabled:bg-white/10 dark:disabled:text-gray-500 dark:disabled:outline-white/5" disabled />
+                                    <button type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2">
+                                        <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 text-gray-400">
+                                            <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
+                                        </svg>
+                                    </button>
+
+                                    <el-options anchor="bottom end" popover class="max-h-60 w-(--input-width) overflow-auto rounded-md bg-white py-1 text-base shadow-lg outline outline-black/5 transition-discrete [--anchor-gap:--spacing(1)] data-leave:transition data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0 sm:text-sm dark:bg-gray-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10">
+                                        <% for (const cliente of clientes) { %>
+                                            <el-option value="<%= cliente.nome %>" class="block truncate px-3 py-2 text-gray-900 select-none aria-selected:bg-indigo-600 aria-selected:text-white dark:text-gray-300 dark:aria-selected:bg-indigo-500">
+                                                <%= cliente.nome %>
+                                            </el-option>
+                                            <% } %>
+                                    </el-options>
+                                </el-autocomplete>
+                            </div>
+
+                            <!-- Cartão -->
+                            <div>
+                                <label for="cartao" class="block mt-8 text-sm/6 font-medium text-gray-900 dark:text-white">Cartão</label>
+                                <el-autocomplete class="relative mt-2 block">
+                                    <input value="<%= cartoes.find(cartao=> cartao.id_cartao === contrato.id_cartao)?.nome || 'Cartão não encontrado' %>" id="cartao" type="text" class="block w-full rounded-md bg-white py-1.5 pr-12 pl-3 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-indigo-600 sm:text-sm/6 dark:bg-white/5 dark:text-white dark:outline-white/10 dark:placeholder:text-gray-500 dark:focus:outline-indigo-500 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-500 disabled:outline-gray-200 dark:disabled:bg-white/10 dark:disabled:text-gray-500 dark:disabled:outline-white/5" disabled />
+                                    <button type="button" class="absolute inset-y-0 right-0 flex items-center rounded-r-md px-2">
+                                        <svg viewBox="0 0 20 20" fill="currentColor" data-slot="icon" aria-hidden="true" class="size-5 text-gray-400">
+                                            <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" fill-rule="evenodd" />
+                                        </svg>
+                                    </button>
+
+                                    <el-options anchor="bottom end" popover class="max-h-60 w-(--input-width) overflow-auto rounded-md bg-white py-1 text-base shadow-lg outline outline-black/5 transition-discrete [--anchor-gap:--spacing(1)] data-leave:transition data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0 sm:text-sm dark:bg-gray-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10">
+                                        <% for (const cartao of cartoes) { %>
+                                            <el-option value="<%= cartao.nome %>" class="block truncate px-3 py-2 text-gray-900 select-none aria-selected:bg-indigo-600 aria-selected:text-white dark:text-gray-300 dark:aria-selected:bg-indigo-500">
+                                                <%= cartao.nome %>
+                                            </el-option>
+                                            <% } %>
+                                    </el-options>
+                                </el-autocomplete>
+                            </div>
+                        </div>
+
+                        <!-- Action buttons -->
+                        <div class="flex items-center justify-end gap-x-4 border-t border-gray-900/10 px-4 py-4 sm:px-8 dark:border-white/10">
+                            <a onclick="window.history.back()" class="rounded-md bg-white px-3 hover:cursor-pointer py-2 text-sm font-semibold text-gray-900 shadow-xs inset-ring inset-ring-gray-300 hover:bg-gray-50 dark:bg-white/10 dark:text-white dark:shadow-none dark:inset-ring-white/5 dark:hover:bg-white/20">Voltar</a>
+                            <a href="/contratos/editar/<%= contrato.id_contrato %>" class="rounded-md bg-indigo-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 dark:bg-indigo-500 dark:shadow-none dark:hover:bg-indigo-400 dark:focus-visible:outline-indigo-500 hover:cursor-default">Editar</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+        </main>
+
+</body>
+
+</html>

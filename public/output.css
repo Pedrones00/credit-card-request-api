@@ -252,9 +252,6 @@
   .sticky {
     position: sticky;
   }
-  .-inset-2\.5 {
-    inset: calc(var(--spacing) * -2.5);
-  }
   .inset-0 {
     inset: calc(var(--spacing) * 0);
   }
@@ -459,14 +456,14 @@
   .w-16 {
     width: calc(var(--spacing) * 16);
   }
-  .w-32 {
-    width: calc(var(--spacing) * 32);
-  }
   .w-56 {
     width: calc(var(--spacing) * 56);
   }
   .w-72 {
     width: calc(var(--spacing) * 72);
+  }
+  .w-fit {
+    width: fit-content;
   }
   .w-full {
     width: 100%;
@@ -538,9 +535,6 @@
   .items-end {
     align-items: flex-end;
   }
-  .items-start {
-    align-items: flex-start;
-  }
   .justify-between {
     justify-content: space-between;
   }
@@ -572,9 +566,6 @@
       margin-block-start: calc(calc(var(--spacing) * 6) * var(--tw-space-y-reverse));
       margin-block-end: calc(calc(var(--spacing) * 6) * calc(1 - var(--tw-space-y-reverse)));
     }
-  }
-  .gap-x-2 {
-    column-gap: calc(var(--spacing) * 2);
   }
   .gap-x-3 {
     column-gap: calc(var(--spacing) * 3);
@@ -1113,9 +1104,6 @@
     -webkit-user-select: none;
     user-select: none;
   }
-  .\[--anchor-gap\:--spacing\(0\.5\)\] {
-    --anchor-gap: calc(var(--spacing) * 0.5);
-  }
   .\[--anchor-gap\:--spacing\(1\)\] {
     --anchor-gap: calc(var(--spacing) * 1);
   }
@@ -1279,11 +1267,6 @@
         --tw-shadow: 0 4px 6px -1px var(--tw-shadow-color, rgb(0 0 0 / 0.1)), 0 2px 4px -2px var(--tw-shadow-color, rgb(0 0 0 / 0.1));
         box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
       }
-    }
-  }
-  .focus\:bg-gray-50 {
-    &:focus {
-      background-color: var(--color-gray-50);
     }
   }
   .focus\:bg-gray-100 {
@@ -1892,11 +1875,6 @@
       background-color: var(--color-gray-300);
     }
   }
-  .dark\:bg-gray-700 {
-    @media (prefers-color-scheme: dark) {
-      background-color: var(--color-gray-700);
-    }
-  }
   .dark\:bg-gray-800 {
     @media (prefers-color-scheme: dark) {
       background-color: var(--color-gray-800);
@@ -2011,11 +1989,6 @@
   .dark\:text-green-500 {
     @media (prefers-color-scheme: dark) {
       color: var(--color-green-500);
-    }
-  }
-  .dark\:text-indigo-300 {
-    @media (prefers-color-scheme: dark) {
-      color: var(--color-indigo-300);
     }
   }
   .dark\:text-indigo-400 {

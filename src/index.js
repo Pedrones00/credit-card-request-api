@@ -79,7 +79,7 @@ const cartoes = [
     bandeira: "Elo",
     anuidade: 299.99,
     dt_inicio_vigencia: "2024-12-31",
-    dt_fim_vigencia: "",
+    dt_fim_vigencia: "2024-12-31",
   },
   {
     id_cartao: 2,
@@ -88,7 +88,7 @@ const cartoes = [
     bandeira: "Visa",
     anuidade: 499.99,
     dt_inicio_vigencia: "2024-12-31",
-    dt_fim_vigencia: "",
+    dt_fim_vigencia: "2025-08-22",
   },
   {
     id_cartao: 3,
@@ -97,7 +97,7 @@ const cartoes = [
     bandeira: "Mastercard",
     anuidade: 575.0,
     dt_inicio_vigencia: "2024-12-31",
-    dt_fim_vigencia: "",
+    dt_fim_vigencia: "2025-12-31",
   },
 ];
 
@@ -124,7 +124,7 @@ app.get("/clientes", (request, response) => {
   });
 });
 
-// Rota para visualizar todos os clientes registrados
+// Rota para visualizar todos os contratos registrados
 app.get("/contratos", (request, response) => {
   response.render("contratos/index", {
     titulo: "Contratos",
@@ -184,6 +184,23 @@ app.get("/clientes/visualizar/:id", (request, response) => {
   });
 });
 
+// Rota para visualizar os dados de um contrato
+app.get("/contratos/visualizar/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const contrato = contratos.find((c) => c.id_contrato === id);
+
+  if (!contrato) {
+    return response.status(404).render("404");
+  }
+
+  response.render("contratos/read", {
+    titulo: "Contratos",
+    contrato,
+    cartoes,
+    clientes,
+  });
+});
+
 // Rota para editar os dados de um cartão
 app.get("/cartoes/editar/:id", (request, response) => {
   const id = Number(request.params.id);
@@ -214,7 +231,24 @@ app.get("/clientes/editar/:id", (request, response) => {
   });
 });
 
-// Rota para desativar um cartão
+// Rota para editar os dados de um contrato
+app.get("/contratos/editar/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const contrato = contratos.find((c) => c.id_contrato === id);
+
+  if (!contrato) {
+    return response.status(404).render("404");
+  }
+
+  response.render("contratos/update", {
+    titulo: "Contratos",
+    contrato,
+    cartoes,
+    clientes,
+  });
+});
+
+// Rota para desativar o registro de um cartão
 app.get("/cartoes/deletar/:id", (request, response) => {
   const id = Number(request.params.id);
   const cartao = cartoes.find((c) => c.id_cartao === id);
@@ -243,6 +277,24 @@ app.get("/clientes/deletar/:id", (request, response) => {
     titulo: "Clientes",
     alerta: true,
     clientes,
+  });
+});
+
+// Rota para desativar o registro de um contrato
+app.get("/contratos/deletar/:id", (request, response) => {
+  const id = Number(request.params.id);
+  const contrato = contratos.find((c) => c.id_contrato === id);
+
+  if (!contrato) {
+    return response.status(404).render("404");
+  }
+
+  response.render("contratos/index", {
+    titulo: "Contratos",
+    alerta: true,
+    contratos,
+    clientes,
+    cartoes,
   });
 });
 

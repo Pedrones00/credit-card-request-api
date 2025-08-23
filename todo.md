@@ -14,7 +14,7 @@
 
 ## Contratos
 
-[] Permitir que um cliente contrate um cartão disponível
+[x] Permitir que um cliente contrate um cartão disponível
 
 [x] Registrar a data da contratação e o status (ativo, cancelado).
 

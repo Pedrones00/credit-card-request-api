@@ -36,17 +36,17 @@ A organização do repositório refleta a arquitetura escolhida.
 
 ```
 .
-├── public                      # Arquivos compartilhados para todas as páginas
-└── src                         #
-    ├── config                  #
-    ├── controllers             #
-    ├── models                  #
-    ├── routes                  #
-    └── views                   # Telas
-        ├── cartoes             # Telas para páginas de cartões
-        ├── clientes            # Telas para páginas de clientes
-        ├── contratos           # Telas para páginas de contratos
-        └── partials            # Fragmentos de telas utilizados nas demais páginas
+├── public                  # Arquivos compartilhados para todas as páginas
+└── src                     #
+    ├── config              #
+    ├── controllers         #
+    ├── models              #
+    ├── routes              #
+    └── views               # Telas
+        ├── cartoes         # Telas para páginas de cartões
+        ├── clientes        # Telas para páginas de clientes
+        ├── contratos       # Telas para páginas de contratos
+        └── partials        # Fragmentos de telas utilizados nas demais páginas
 ```
 
 ## 💾 Modelos de dados

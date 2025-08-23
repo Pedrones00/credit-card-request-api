@@ -23,6 +23,25 @@
                 dialog.show();
             });
         });
+
+        const form = document.querySelector('form');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const data = {
+                nome: form.nome.value,
+                cpf: form.cpf.value,
+                email: form.email.value,
+                dt_nascimento: form.dt_nascimento.value,
+            };
+
+            fetch('/api/clientes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+            }).then(res => {});
+        });
     </script>
 </head>
 

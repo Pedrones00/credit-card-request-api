@@ -79,7 +79,7 @@
                     <h2 class="dark:text-white font-medium text-xl text-gray-500">Contratos cadastrados</h2>
 
                     <!-- Cards -->
-                    <ul role="list" class="grid grid-cols-1 gap-x-6 gap-y-8 lg:grid-cols-3 xl:gap-x-8 mt-3">
+                    <ul role="list" class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-8 lg:grid-cols-3 xl:gap-x-8 mt-3">
 
                         <% for(const contrato of contratos) { %>
                             <!-- Card item -->
@@ -135,7 +135,7 @@
                                 <dl class="-my-3 divide-y divide-gray-100 px-6 py-4 text-sm/6 dark:divide-white/10">
                                     <div class="flex justify-between gap-x-4 py-3">
                                         <dt class="text-gray-500 dark:text-gray-400">Cartão</dt>
-                                        <dd class="text-gray-700 dark:text-gray-300">
+                                        <dd class="text-gray-700 dark:text-gray-300 line-clamp-1">
                                             <a href="/cartoes/visualizar/<%= contrato.id_cartao %>">
                                                 <%= cartoes.find(cartao=> cartao.id_cartao === contrato.id_cartao)?.nome || 'Cartão não encontrado' %>
                                             </a>
@@ -143,7 +143,7 @@
                                     </div>
                                     <div class="flex justify-between gap-x-4 py-3">
                                         <dt class="text-gray-500 dark:text-gray-400">Cliente</dt>
-                                        <dd class="text-gray-700 dark:text-gray-300">
+                                        <dd class="text-gray-700 dark:text-gray-300 line-clamp-1">
                                             <a href="/clientes/visualizar/<%= contrato.id_cliente %>">
                                                 <%= clientes.find(cliente=> cliente.id_cliente === contrato.id_cliente)?.nome || 'Cliente não encontrado' %>
                                             </a>

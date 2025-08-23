@@ -45,7 +45,7 @@ const contratos = [
 const clientes = [
   {
     id_cliente: 1,
-    nome: "João de Souza",
+    nome: "Luiz Carlos Garrido de Souza",
     cpf: "123.456.789-00",
     email: "email@dominio.com",
     dt_nascimento: "1990-01-01",

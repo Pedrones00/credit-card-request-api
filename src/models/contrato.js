@@ -13,6 +13,7 @@ export default (sequelize) => {
             },
             id_cliente: {
                 type: DataTypes.INTEGER,
+                allowNull: false,
                 references: {
                     model: 'cliente',
                     key: 'id_cliente',
@@ -22,6 +23,7 @@ export default (sequelize) => {
             },
             id_cartao: {
                 type: DataTypes.INTEGER,
+                allowNull: false,
                 references: {
                     model: 'cartao',
                     key: 'id_cartao',
@@ -29,19 +31,20 @@ export default (sequelize) => {
                 onUpdate: 'CASCADE',
                 onDelete: 'RESTRICT'
             },
-            dt_inicio_vigencia: {
-                type: DataTypes.DATEONLY,
+            contrato_ativo:  {
+                type: DataTypes.BOOLEAN,
                 allowNull: false,
-                defaultValue: () => {
-                    let today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    return today;
-                },
+                defaultValue: true,
+            },
+            dt_inicio_vigencia: {
+                type: DataTypes.DATE,
+                allowNull: false,
+                defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
             },
             dt_fim_vigencia: {
-                type: DataTypes.DATEONLY,
-                allowNull: false,
-                defaultValue: '9999-12-31',
+                type: DataTypes.DATE,
+                allowNull: true,
+                defaultValue: null,
             },
 
         },

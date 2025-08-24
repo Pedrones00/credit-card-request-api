@@ -5,6 +5,7 @@ class CartaoController {
         this.Cartao = CartaoModel;
         this.Contrato = ContratoModel;
         this.Cliente = ClienteModel;
+        this.mutableRequestFields = { fields: ['nome', 'tipo', 'bandeira', 'anuidade', ]};
     }
 
     #getToday(){
@@ -12,40 +13,10 @@ class CartaoController {
         return today;
     }
 
-    #getActiveCardsFilter() {
-        const today = this.#getToday();
-
-        const filter = {
-            dt_fim_vigencia: {
-                        [Op.gte]: today,
-                    },
-                    dt_inicio_vigencia: {
-                        [Op.lte]: today
-                    }
-        }
-
-        return filter;
-    }
-
-    #getDeactiveCardsFilter() {
-        const today = this.#getToday();
-
-        const filter = {
-            [Op.or]: [
-                        {
-                            dt_fim_vigencia: {
-                                [Op.lt]: today,
-                            }
-                        },
-                        {
-                            dt_inicio_vigencia: {
-                                [Op.gt]: today
-                            }
-                        }
-                    ]
-        }
-
-        return filter;
+    #throwError(errorStatusCode = 500, errorMessage = '') {
+        const err =  new Error(errorMessage);
+        err.statusCode = errorStatusCode;
+        throw err;
     }
 
     #createSequelizeIncludeArrays (detailsContrato, detailsCliente) {
@@ -72,13 +43,25 @@ class CartaoController {
         return arrayInclude;
     }
 
-    #validateInputs(request) {
+    #validateRegisterInputs(request) {
 
-        if (request.body && request.body.nome && request.body.tipo && request.body.bandeira) {
-            return true;
-        }
+        let errorMessages = [];
 
-        return false;
+        if (!request.body) this.#throwError(400, 'Requisição sem corpo, é necessário o envio de informações para o cadastro de um cartão');
+
+        if (!request.body.nome) errorMessages.push('nome: nome do cartão');
+        if (!request.body.tipo) errorMessages.push('tipo: tipo do cartão');
+        if (!request.body.bandeira) errorMessages.push('bandeira: bandeira do cartão');
+
+        if (errorMessages.length) this.#throwError(400, `Campos obrigatórios não preenchidos: ${errorMessages}`);
+        
+    }
+
+    #validateUpdateInputs(request) {
+
+        if (!request.body) this.#throwError(400, 'Requisição sem corpo, é necessário o envio de informações para o cadastro de um cartão');
+
+        if (!request.body.id_cartao) this.#throwError(400, 'O ID do cartão está ausente (id_cartao)');
     }
 
     async #disableContratos(id_cartao) {
@@ -88,11 +71,12 @@ class CartaoController {
         const contratos_ativos = await this.Contrato.findAll({
             where: {
                 id_cartao: id_cartao,
-                dt_fim_vigencia : {[Op.gte]:today}
+                contrato_ativo : true,
             }
         });
 
         for (const contrato of contratos_ativos) {
+            contrato.contrato_ativo = false;
             contrato.dt_fim_vigencia = today;
             await contrato.save();
         }
@@ -100,68 +84,59 @@ class CartaoController {
         return contratos_ativos;
     }
 
-    async #listAll(cartaoState = true, detailsContrato = false, detailsCliente = true) {
+    async #listAll(cartaoState = null, detailsContrato = false, detailsCliente = true) {
 
         const cartoes = await this.Cartao.findAll({
-            where: cartaoState === true ? this.#getActiveCardsFilter() : this.#getDeactiveCardsFilter(),
+            where: cartaoState === null ? {} : {cartao_ativo: cartaoState},
             include: this.#createSequelizeIncludeArrays(detailsContrato, detailsCliente),
         });
 
         return cartoes;
     }
 
-    async #searchID(id, detailsContrato = false, detailsCliente = true) {
+    async #searchID(id_cartao, detailsContrato = false, detailsCliente = true) {
 
-        const cartao = await this.Cartao.findByPk(id, {
+        const cartao = await this.Cartao.findByPk(id_cartao, {
             include: this.#createSequelizeIncludeArrays(detailsContrato, detailsCliente),
         });
 
-        if (!cartao) {
-            const err = new Error("Cartão não encontrado");
-            err.statusCode = 404;
-            throw err;
-        }
+        if (!cartao) this.#throwError(404, 'Cartão não encontrado');
 
         return cartao;
     }
 
     async #register(request) {
 
-        const isValidInput = this.#validateInputs(request);
-        if (!isValidInput) {
-            const err =  new Error("Campos obrigatórios não preenchidos!");
-            err.statusCode = 400;
-            throw err;
-        }
+        this.#validateRegisterInputs(request);
 
-        const newCartao = await this.Cartao.create(request.body);
-        return newCartao;
+        const newCartao = await this.Cartao.create(request.body, this.mutableRequestFields);
+
+        return await newCartao.reload();
     }
 
     async #updateCartao(request) {
-        const id = request.body.id;
-        const cartao = await this.#searchID(id, false, false);
-        if (!cartao) {
-            const err = new Error("Cartão não encontrado");
-            err.statusCode = 404;
-            throw err;
-        }
 
-        const updatedCartao = await cartao.update(request.body);
+        this.#validateUpdateInputs(request);
+
+        const id_cartao = request.body.id_cartao;
+
+        const cartao = await this.#searchID(id_cartao, false, false);
+        if (!cartao) this.#throwError(404, 'Cartão não encontrado');
+        if(cartao.cartao_ativo === false) this.#throwError(400, 'O cartão esta desativado, não é possível alterar seus registros');
+
+        const updatedCartao = await cartao.update(request.body, this.mutableRequestFields);
+
         return updatedCartao;
     }
 
-    async #deleteCartao(id) {
+    async #deleteCartao(id_cartao) {
         const today = this.#getToday();
-        const cartao = await this.Cartao.findByPk(id);
+        const cartao = await this.#searchID(id_cartao, false, false);
 
-        if (!cartao) {
-            const err = new Error("Cartão não encontrado");
-            err.statusCode = 404;
-            throw err;
-        }
+        if (!cartao) this.#throwError(404, 'Cartão não encontrado');
+        if(cartao.cartao_ativo === false) this.#throwError(400, 'O cartão já estava desativado, nenhuma modificação foi realizada');
 
-        await cartao.update({dt_fim_vigencia: today});
+        await cartao.update({cartao_ativo: false, dt_fim_vigencia: today});
         const contratos_desativados = await this.#disableContratos(cartao.id_cartao);
 
         return {cartao, contratos_desativados};
@@ -171,11 +146,13 @@ class CartaoController {
     async listAllAPI(request, response) {
         try {
             const arrayQueryDetails = Array.isArray(request.query.details) ? [...request.query.details] : [request.query.details];
-            let cartaoState = true;
+            let cartaoState = null;
             let detailsContrato = false;
             let detailsCliente = false;
 
             if (request.query.active === 'false') cartaoState = false;
+            if (request.query.active === 'true') cartaoState = true;
+
             if (arrayQueryDetails.includes('contrato')) detailsContrato = true;
             if (arrayQueryDetails.includes('cliente')) detailsCliente = true;
 
@@ -183,14 +160,14 @@ class CartaoController {
 
             return response.status(200).json(cartoes);
             
-        } catch (error) {
-            return response.status(500).json({error: error.message});
+        } catch (error) { 
+            return response.status(error.statusCode? error.statusCode : 500).json({error: error.message});
         }
     }
 
     async searchIDAPI(request, response) {
         try {
-            const id = request.params.id;
+            const id_cartao = request.params.id;
             const arrayQueryDetails = Array.isArray(request.query.details) ? [...request.query.details] : [request.query.details];
             let detailsContrato = false;
             let detailsCliente = false;
@@ -198,12 +175,12 @@ class CartaoController {
             if (arrayQueryDetails.includes('contrato')) detailsContrato = true;
             if (arrayQueryDetails.includes('cliente')) detailsCliente = true;
 
-            const cartao = await this.#searchID(id, detailsContrato, detailsCliente);
+            const cartao = await this.#searchID(id_cartao, detailsContrato, detailsCliente);
 
             return response.status(200).json(cartao);
 
         } catch (error) {
-            return response.status(500).json({ error: error.message });
+            return response.status(error.statusCode? error.statusCode : 500).json({error: error.message});
         }
     }
 
@@ -211,47 +188,41 @@ class CartaoController {
         try {
             const newCartao = await this.#register(request);
 
-            response.status(200).json(newCartao);
+            return response.status(200).json(newCartao);
             
         } catch (error) {
-            if (error.statusCode === 400) return response.status(error.statusCode).json({error: error.message});
-
-            return response.status(500).json({ error: error.message});
+            return response.status(error.statusCode? error.statusCode : 500).json({error: error.message});
         }
     }
 
     async updateCartaoAPI(request, response) {
         try {
-            const updatedCartao = await this.#updateCartao(request);
+            const cartao = await this.#updateCartao(request);
 
             return response.status(200).json({
                 message: "Cartão atualizado com sucesso",
-                updatedCartao,
+                cartao,
             });
 
         } catch (error) {
-            if (error.statusCode === 404) return response.status(error.statusCode).json({error: error.message});
-
-            return response.status(500).json({ error: error.message});
+            return response.status(error.statusCode? error.statusCode : 500).json({error: error.message});
         }
     }
 
     async deleteCartaoAPI(request, response) {
         try {
-            const id = request.params.id;
+            const id_cartao = request.params.id;
 
-            const {cartao, contratos_desativados} = await this.#deleteCartao(id);
+            const {cartao, contratos_desativados} = await this.#deleteCartao(id_cartao);
 
-            response.status(200).json({
-                    message: "O cartão e seus contratos estarão desabilitado a partir de amanhã.",
+            return response.status(200).json({
+                    message: "O cartão e seus contratos relacionados foram desativados.",
                     cartao,
                     contratos_desativados
                 });
 
         } catch (error) {
-            if (error.statusCode === 404) return response.status(error.statusCode).json({error: error.message});
-
-            response.status(500).json({ error: error.message });
+            return response.status(error.statusCode? error.statusCode : 500).json({error: error.message});
         }
     }
 

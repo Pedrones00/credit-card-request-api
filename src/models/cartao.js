@@ -28,19 +28,20 @@ export default (sequelize) => {
                 allowNull: false,
                 defaultValue: 0.00,
             },
-            dt_inicio_vigencia: {
-                type: DataTypes.DATEONLY,
+            cartao_ativo: {
+                type: DataTypes.BOOLEAN,
                 allowNull: false,
-                defaultValue: () => {
-                    let today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    return today;
-                }
+                defaultValue: true,
+            },
+            dt_inicio_vigencia: {
+                type: DataTypes.DATE,
+                allowNull: false,
+                defaultValue: sequelize.literal('CURRENT_TIMESTAMP'),
             },
             dt_fim_vigencia: {
-                type: DataTypes.DATEONLY,
-                allowNull: false,
-                defaultValue: '9999-12-31',
+                type: DataTypes.DATE,
+                allowNull: true,
+                defaultValue: null,
             }
 
         },

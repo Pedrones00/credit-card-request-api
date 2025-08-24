@@ -5,6 +5,7 @@ class ContratoController {
         this.Contrato = ContratoModel;
         this.Cliente = ClienteModel;
         this.Cartao = CartaoModel;
+        this.mutableRequestFields = { fields: ['id_cliente', 'id_cartao',]};
     }
 
     #getToday(){
@@ -12,40 +13,10 @@ class ContratoController {
         return today;
     }
 
-    #getActiveContratosFilter() {
-        const today = this.#getToday();
-
-        const filter = {
-            dt_fim_vigencia: {
-                        [Op.gte]: today,
-                    },
-                    dt_inicio_vigencia: {
-                        [Op.lte]: today
-                    }
-        }
-
-        return filter;
-    }
-
-    #getDeactiveContratosFilter() {
-        const today = this.#getToday();
-
-        const filter = {
-            [Op.or]: [
-                        {
-                            dt_fim_vigencia: {
-                                [Op.lt]: today,
-                            }
-                        },
-                        {
-                            dt_inicio_vigencia: {
-                                [Op.gt]: today
-                            }
-                        }
-                    ]
-        }
-
-        return filter;
+    #throwError(errorStatusCode = 500, errorMessage = '') {
+        const err =  new Error(errorMessage);
+        err.statusCode = errorStatusCode;
+        throw err;
     }
 
     #createSequelizeIncludeArrays (detailsCliente, detailsCartao) {
@@ -63,13 +34,23 @@ class ContratoController {
         return arrayInclude;
     }
 
-    #validateInputs(request) {
+    #validateRegisterInputs(request) {
 
-        if (request.body && request.body.id_cartao && request.body.id_cliente) {
-            return true;
-        }
+        let errorMessages = [];
 
-        return false;
+        if (!request.body) this.#throwError(400, 'Requisição sem corpo, é necessário o envio de informações para o cadastro de um contrato');
+
+        if (!request.body.id_cartao) errorMessages.push('id_cartao: id do cartão a ser cadastrado');
+        if (!request.body.id_cliente) errorMessages.push('id_cliente: id do cliente a ser cadastrado');
+
+        if (errorMessages.length) this.#throwError(400, `Campos obrigatórios não preenchidos: ${errorMessages}`);
+    }
+
+    #validateUpdateInputs(request) {
+        
+        if (!request.body) this.#throwError(400, 'Requisição sem corpo, é necessário o envio de informações para o cadastro de um contrato');
+
+        if (!request.body.id_contrato) this.#throwError(400, 'O ID do contrato está ausente (id_contrato)');
     }
 
     async #getActiveClientes(){
@@ -99,147 +80,85 @@ class ContratoController {
         return cartoes;
     }
 
-    async #validateCliente (id_cliente) {
-        
-        const cliente = await this.Cliente.findByPk(id_cliente);
-
-        if (!cliente || !cliente.cliente_ativo) {
-            return false;
-        }
-
-        return true;
-
-    }
-
-    async #validateCartao (id_cartao) {
-                
-        const cartao = await this.Cartao.findByPk(id_cartao);
-        if (!cartao) {
-            return false;
-        }
-
-        const today = this.#getToday();
-        const dt_inicio_vigencia = new Date(cartao.dt_inicio_vigencia).toISOString();
-        const dt_fim_vigencia = new Date(cartao.dt_fim_vigencia).toISOString();
-        
-        if (dt_inicio_vigencia > today || dt_fim_vigencia < today) {
-            return false;
-        }
-            
-        return true;
-    }
-
     async #validateCartaoCliente(id_cartao, id_cliente) {
 
-        const isValidCartao = await this.#validateCartao(id_cartao);
-        const isValidCliente = await this.#validateCliente(id_cliente);
+        let errorMessages = []
+
+        const cartao = await this.Cartao.findByPk(id_cartao);
+        const cliente = await this.Cliente.findByPk(id_cliente);
         
-        if (!isValidCartao || !isValidCliente) {
-            let errorsMessage = [];
+        if (!cartao && id_cartao) errorMessages.push('Cartao não existe');
+        if (!cliente && id_cliente) errorMessages.push('Cliente não existe');
+    
+        if (cartao && !cartao.cartao_ativo) errorMessages.push('Cartao está desativado');
+        if (cliente && !cliente.cliente_ativo) errorMessages.push('Cliente está desativado');
+        if (cliente && !cliente.cpf_regular) errorMessages.push('Cliente com cpf irregular');
 
-            if (!isValidCartao) errorsMessage.push('Cartao inválido');
-            if (!isValidCliente) errorsMessage.push('Cliente inválido');
+        if (errorMessages.length) this.#throwError(400, `Campos inválidos: ${errorMessages}`)
 
-            const err =  new Error(errorsMessage);
-            err.statusCode = 400;
-            throw err;
-        }
     }
 
-    async #listAll(contratoState = true, detailsCliente = false, detailsCartao = false) {
+    async #listAll(contratoState = null, detailsCliente = false, detailsCartao = false) {
         
         const contratos = await this.Contrato.findAll({
-                where : contratoState === true ? this.#getActiveContratosFilter() : this.#getDeactiveContratosFilter(),
+                where : contratoState  === null? {} : {contrato_ativo: contratoState},
                 include: this.#createSequelizeIncludeArrays(detailsCliente, detailsCartao),
             });
 
         return contratos;
     }
 
-    async #searchID(id, detailsCliente = false, detailsCartao = false) {
-        const contrato = await this.Contrato.findByPk(id, {
+    async #searchID(id_contrato, detailsCliente = false, detailsCartao = false) {
+        const contrato = await this.Contrato.findByPk(id_contrato, {
             include: this.#createSequelizeIncludeArrays(detailsCliente, detailsCartao),
         });
 
-        if (!contrato) {
-            const err = new Error("Contrato não encontrado");
-            err.statusCode = 404;
-            throw err;
-        }
+        if (!contrato) this.#throwError(404, 'Contrato não encontrado');
 
         return contrato;
     }
 
     async #register(request) {
-        const isValidInput = this.#validateInputs(request);
-        if (!isValidInput) {
-            const err =  new Error("Campos obrigatórios não preenchidos!");
-            err.statusCode = 400;
-            throw err;
-        }
+
+        this.#validateRegisterInputs(request);
 
         await this.#validateCartaoCliente(request.body.id_cartao, request.body.id_cliente);
         
-        const newContrato = await this.Contrato.create(request.body);
+        const newContrato = await this.Contrato.create(request.body, this.mutableRequestFields);
 
-        return newContrato;
+        return await newContrato.reload();
     }
 
     async #update(request) {
+
+        this.#validateUpdateInputs(request);
 
         const id_contrato = request.body.id_contrato;
         const id_cartao = request.body.id_cartao;
         const id_cliente = request.body.id_cliente;
 
         const contrato = await this.Contrato.findByPk(id_contrato);
-        if (!contrato) {
-            const err = new Error("Contrato não encontrado.");
-            err.statusCode = 404;
-            throw err;
-        }
+        if (!contrato) this.#throwError(404, 'Contrato não encontrado');
+        if(contrato.contrato_ativo === false) this.#throwError(400, 'O contrato esta desativado, não é possível alterar seus registros');
             
-        if (id_cartao) {
-            const isValidCartao = await this.#validateCartao(id_cartao);
-            if (!isValidCartao) {
-                const err = new Error("Cartão inválido.");
-                err.statusCode = 400;
-                throw err;
-            }
-        }
-
-        if (id_cliente) {
-            const isValidCliente = await this.#validateCliente(id_cliente);
-            if (!isValidCliente) {
-                const err = new Error("Cliente inválido.");
-                err.statusCode = 400;
-                throw err;
-            }
-        }
+        await this.#validateCartaoCliente(id_cartao, id_cliente);
             
-        await contrato.update(request.body);
+        await contrato.update(request.body, this.mutableRequestFields);
 
         return contrato;
     }
 
     async #delete(id_contrato) {
         const contrato = await this.Contrato.findByPk(id_contrato);
-        if (!contrato) {
-            const err = new Error("Contrato não encontrado.");
-            err.statusCode = 404;
-            throw err;
-        }
+
+        if (!contrato) this.#throwError(404, 'Contrato não encontrado');
+        if (!contrato.contrato_ativo) this.#throwError(400, 'O cartão já estava desativado, nenhuma modificação foi realizada');
         
         const today = this.#getToday();
-        const dateEndContrato = new Date(contrato.dt_fim_vigencia).toISOString();
-
-        if (dateEndContrato <= today) {
-            const err = new Error("Contrato já está desativado.");
-            err.statusCode = 400;
-            throw err;
-        }
-
+        
         await contrato.update({
-            dt_fim_vigencia: today
+            dt_fim_vigencia: today,
+            contrato_ativo: false,
         });
 
         return contrato;
@@ -249,20 +168,23 @@ class ContratoController {
         try {
 
             const arrayQueryDetails = Array.isArray(request.query.details) ? [...request.query.details] : [request.query.details];
-            let contratoState = true;
+            let contratoState = null;
             let detailsCartao = false;
             let detailsCliente = false;
 
+            
             if (request.query.active === 'false') contratoState = false;
+            if (request.query.active === 'true') contratoState = true;
+
             if (arrayQueryDetails.includes('cartao')) detailsCartao = true;
             if (arrayQueryDetails.includes('cliente')) detailsCliente = true;
 
             const contratos = await this.#listAll(contratoState, detailsCliente, detailsCartao);
 
-            response.status(200).json(contratos);
+            return response.status(200).json(contratos);
 
         } catch (error) {
-            response.status(500).json({error: error.message});
+            return response.status(error.statusCode? error.statusCode : 500).json({error: error.message});
         }
     }
 
@@ -279,10 +201,10 @@ class ContratoController {
 
             const contrato = await this.#searchID(id_contrato, detailsCliente, detailsCartao);
 
-            response.status(200).json(contrato);
+            return response.status(200).json(contrato);
 
         } catch (error) {
-            response.status(500).json({ error: error.message });
+            return response.status(error.statusCode? error.statusCode : 500).json({error: error.message});
         }
     }
 
@@ -291,10 +213,10 @@ class ContratoController {
             
             const newContrato = await this.#register(request);
 
-            response.status(201).json(newContrato);
+            return response.status(201).json(newContrato);
 
         } catch (error) {
-            response.status(500).json({error: error.message});
+            return response.status(error.statusCode? error.statusCode : 500).json({error: error.message});
         }
     }
 
@@ -303,13 +225,13 @@ class ContratoController {
 
             const contrato = await this.#update(request);
 
-            response.status(200).json({
+            return response.status(200).json({
                 message: "Contrato atualizado com sucesso",
                 contrato,
             });
 
         } catch (error) {
-            response.status(500).json({error: error.message});
+            return response.status(error.statusCode? error.statusCode : 500).json({error: error.message});
         }
     }
 
@@ -319,14 +241,14 @@ class ContratoController {
 
             const contrato = await this.#delete(id_contrato);
 
-            response.status(200).json({
-                message: "Contrato estará desabilidado a partir de amanhã.",
+            return response.status(200).json({
+                message: "O contrato está desativado.",
                 contrato,
             });
 
 
         } catch (error) {
-            response.status(500).json({error: error.message});
+            return response.status(error.statusCode? error.statusCode : 500).json({error: error.message});
         }
     }
 

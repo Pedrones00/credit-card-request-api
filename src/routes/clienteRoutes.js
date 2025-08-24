@@ -14,6 +14,7 @@ export default function clienteRoutes(clienteController) {
 
     routes.post('/api/clientes', async (request, response) => clienteController.registerAPI(request, response));
     routes.patch('/api/clientes', async (request, response) => clienteController.updateClienteAPI(request, response));
+    routes.patch('/api/clientes/:id', async (request, response) => clienteController.activateClienteAPI(request, response));
     routes.delete('/api/clientes/:id', async (request, response) => clienteController.deleteClienteAPI(request, response))
 
     return routes;

@@ -5,6 +5,7 @@ class ClienteController {
         this.Cliente = ClienteModel;
         this.Cartao = CartaoModel;
         this.Contrato = ContratoModel;
+        this.mutableRequestFields = { fields: ['nome', 'cpf', 'email', 'dt_nascimento', 'cpf_regular']};
     }
 
     #getToday() {
@@ -13,18 +14,30 @@ class ClienteController {
         return today;
     }
 
-    #validateInputs (request) {
-        if (request.body && request.body.nome && request.body.cpf && request.body.dt_nascimento) {
-            return true;
-        }
-        return false;
+    #throwError(errorStatusCode = 500, errorMessage = '') {
+        const err = new Error(errorMessage);
+        err.statusCode = errorStatusCode;
+        throw err;
     }
 
-    #validateClienteAtivo (request, cliente) {
-        if (cliente.cpf_regular === false && request.body.cliente_ativo === true) {
-            return false;
-        }
-        return true;
+    #validateRegisterInputs (request) {
+
+        let errorMessages = [];
+
+        if (!request.body) this.#throwError(400, 'Requisição sem corpo, é necessário o envio de informações para o cadastro de um cliente');
+
+        if (!request.body.nome) errorMessages.push('nome: nome do cliente');
+        if (!request.body.cpf) errorMessages.push('cpf: cpf do cliente');
+        if (!request.body.dt_nascimento) errorMessages.push('dt_nascimento: data de nascimento do cliente');
+
+        if (errorMessages.length) this.#throwError(400, `Campos obrigatórios não preenchidos: ${errorMessages}`);
+    }
+
+    #validateUpdateInputs(request) {
+
+        if (!request.body) this.#throwError(400, 'Requisição sem corpo, é necessário o envio de informações para o cadastro de um cliente');
+
+        if (!request.body.id_cliente) this.#throwError(400, 'O ID do cliente está ausente (id_cliente)');
     }
 
     #createSequelizeIncludeArrays (detailsContrato, detailsCartao) {
@@ -51,19 +64,13 @@ class ClienteController {
         return arrayInclude;
     }
 
-    async #verifyDuplicateCPF (request, cliente) {
-        const cpfRequest = request.body.cpf;
-        let cpfInUse = null;
+    async #validateDuplicateCPF (cpf_cliente) {
+        
+        const cpfInUse = await this.Cliente.findOne({
+                where: {cpf: cpf_cliente}
+            });
 
-        if (cpfRequest && cliente && cpfRequest !== cliente.cpf) {
-            cpfInUse = await this.Cliente.findOne({
-                where: {cpf: cpfRequest}
-            })
-        }
-
-        if (cpfInUse) return false;
-
-        return true;
+        if (cpfInUse) this.#throwError(404, `CPF já existe na base para o cliente id ${cpfInUse.id_cliente}`);
     }
 
     async #disableContratos(id_cliente) {
@@ -85,112 +92,64 @@ class ClienteController {
             return contratos_ativos;
         }
 
-    async #listAll(clienteState = true, cpfCliente = null, detailsContrato = false, detailsCartao = false) {
-
-
+    async #listAll(clienteState = null, cpfCliente = null, detailsContrato = false, detailsCartao = false) {
 
         const clientes = await this.Cliente.findAll({
                 where: {
-                    cliente_ativo: clienteState,
-                    ...(cpfCliente ? {cpf: cpfCliente} : {}) 
+                    ...(clienteState === null ? {} : {cliente_ativo: clienteState}),
+                    ...(cpfCliente ? {cpf: cpfCliente} : {}),
                 },
-                include: this.#createSequelizeIncludeArrays(detailsContrato, detailsCartao)
+                include: this.#createSequelizeIncludeArrays(detailsContrato, detailsCartao),
             });
-
-        if (!clientes && cpfCliente) {
-            const err = new Error("Cliente não encontrado");
-            err.statusCode = 404;
-            throw err;
-        }
+        
+        if (!clientes && cpfCliente) this.#throwError(404, 'Cliente não encontrado');
 
         return clientes;
     }
 
     async #register(request) {
 
-        const isValidInput = this.#validateInputs(request);
-        if (!isValidInput) {
-                const err =  new Error("Campos obrigatórios não preenchidos!");
-                err.statusCode = 400;
-                throw err;
-        }
-
-        const checkExistingCliente = await this.Cliente.findOne({
-            where: {cpf: request.body.cpf}
-        });
-
-        if (checkExistingCliente) {
-            const err =  new Error("Cpf já existe na base.");
-            err.statusCode = 409;
-            throw err;
-        }
-
-        if (request.body.cpf_regular === false) {
-            const err =  new Error("Usuário com cpf irregular, cadastro não efetuado.");
-            err.statusCode = 403;
-            throw err;
-        }
+        this.#validateRegisterInputs(request);
+    
+        await this.#validateDuplicateCPF(request.body.cpf);
         
-        const newCliente = await this.Cliente.create(request.body);
+        const newCliente = await this.Cliente.create(request.body, this.mutableRequestFields);
 
-        return newCliente;
+        return await newCliente.reload();
 
     }
 
-    async #searchID(id, detailsContrato = false, detailsCartao = false) {
+    async #searchID(id_cliente, detailsContrato = false, detailsCartao = false) {
 
-        const cliente = await this.Cliente.findByPk(id, {
+        const cliente = await this.Cliente.findByPk(id_cliente, {
                 include: this.#createSequelizeIncludeArrays(detailsContrato, detailsCartao),
             }
             );
 
-        if (!cliente) {
-            const err = new Error("Cliente não encontrado");
-            err.statusCode = 404;
-            throw err;
-        }
+        if (!cliente) this.#throwError(404, 'Cliente não encontrado');
 
         return cliente;
     }
 
     async #updateCliente(request) {
 
-        const id = request.body.id_cliente;
+        this.#validateUpdateInputs(request);
 
-        const cliente = await this.Cliente.findByPk(id);
-        if (!cliente) {
-            const err = new Error("Cliente não encontrado");
-            err.statusCode = 404;
-            throw err;
-        }
+        const cliente = await this.Cliente.findByPk(request.body.id_cliente);
+        if (!cliente) this.#throwError(404, 'Cliente não encontrado');
 
-        const isValidClienteAtivo = this.#validateClienteAtivo(request, cliente);
-        if (!isValidClienteAtivo) {
-            const err =  new Error("Cliente com o cpf irregular.");
-            err.statusCode = 400;
-            throw err;
-        }
-
-        const isValidCPF = await this.#verifyDuplicateCPF(request, cliente);
-        if (!isValidCPF) {
-            const err =  new Error("CPF em uso.");
-            err.statusCode = 409;
-            throw err;
-        }
+        if (request.body.cpf) await this.#validateDuplicateCPF(request.body.cpf);
             
-        await cliente.update(request.body);
+        await cliente.update(request.body, this.mutableRequestFields);
 
         return cliente;
     }
 
-    async #deleteCliente(id) {
+    async #deleteCliente(id_cliente) {
 
-        const cliente = await this.Cliente.findByPk(id);
-        if (!cliente) {
-            const err = new Error("Cliente não encontrado");
-            err.statusCode = 404;
-            throw err;
-        }
+        const cliente = await this.Cliente.findByPk(id_cliente);
+        if (!cliente) this.#throwError(404, 'Cliente não encontrado');
+        if (cliente.cliente_ativo === false) this.#throwError(400, 'O cliente já está desativado, nenhum modificação foi realizada');
 
         await cliente.update({cliente_ativo: false});
 
@@ -199,26 +158,38 @@ class ClienteController {
         return {cliente, contratos_desativados};
     }
 
+    async #activateCliente(id_cliente) {
+        
+        const cliente = await this.Cliente.findByPk(id_cliente);
+
+        if (!cliente) this.#throwError(404, 'Cliente não encontrado');
+        if (cliente.cliente_ativo === true) this.#throwError(400, 'O cliente já está ativo, nenhum modificação foi realizada');
+
+        await cliente.update({cliente_ativo: true});
+
+        return cliente;
+    }
+
     async listAllAPI(request, response) {
         try {
             const cpfCliente = request.query.cpf;
             const arrayQueryDetails = Array.isArray(request.query.details) ? [...request.query.details] : [request.query.details];
-            let clienteState = true;
+            let clienteState = null;
             let detailsContrato = false;
             let detailsCartao = false;
 
             if (request.query.active === 'false') clienteState = false;
+            if (request.query.active === 'true') clienteState = true;
+
             if (arrayQueryDetails.includes('contrato')) detailsContrato = true;
             if (arrayQueryDetails.includes('cartao')) detailsCartao = true;
 
             const clientes = await this.#listAll(clienteState, cpfCliente, detailsContrato, detailsCartao);
 
-            response.status(200).json(clientes);
+            return response.status(200).json(clientes);
 
         } catch (error) {
-            if (error.statusCode === 404) return response.status(error.statusCode).json({error: error.message});
-
-            return response.status(500).json({ error: error.message});
+            return response.status(error.statusCode ? error.statusCode : 500).json({error: error.message});
         }
     }
 
@@ -233,16 +204,13 @@ class ClienteController {
             });
 
         } catch (error) {
-            if (error.statusCode === 403) return response.status(error.statusCode).json({error: error.message});
-            if (error.statusCode === 409) return response.status(error.statusCode).json({error: error.message});
-
-            return response.status(500).json({ error: error.message});
+            return response.status(error.statusCode ? error.statusCode : 500).json({error: error.message});
         }
     }
 
     async searchIDAPI(request, response) {
         try {
-            const id = request.params.id;
+            const id_cliente = request.params.id;
             const arrayQueryDetails = Array.isArray(request.query.details) ? [...request.query.details] : [request.query.details];
             let detailsContrato = false;
             let detailsCartao = false;
@@ -250,52 +218,60 @@ class ClienteController {
             if (arrayQueryDetails.includes('contrato')) detailsContrato = true;
             if (arrayQueryDetails.includes('cartao')) detailsCartao = true;
 
-            const cliente = await this.#searchID(id, detailsContrato, detailsCartao);
+            const cliente = await this.#searchID(id_cliente, detailsContrato, detailsCartao);
 
             return response.status(200).json(cliente);
 
         } catch (error) {
-            if (error.statusCode === 404) return response.status(error.statusCode).json({error: error.message});
-
-            return response.status(500).json({ error: error.message});
+            return response.status(error.statusCode ? error.statusCode : 500).json({error: error.message});
         }
     }
 
     async updateClienteAPI(request, response) {
         try {
             
-            const updatedCliente = await this.#updateCliente(request);
+            const cliente = await this.#updateCliente(request);
 
-            response.status(200).json({
+            return response.status(200).json({
                 message: "Cliente atualizado com sucesso",
-                updatedCliente,
+                cliente,
             });
 
         } catch (error) {
-            if (error.statusCode === 400) return response.status(error.statusCode).json({error: error.message});
-            if (error.statusCode === 404) return response.status(error.statusCode).json({error: error.message});
-            if (error.statusCode === 409) return response.status(error.statusCode).json({error: error.message});
-
-            return response.status(500).json({ error: error.message});
+            return response.status(error.statusCode ? error.statusCode : 500).json({error: error.message});
         }
     }
 
     async deleteClienteAPI(request, response) {
         try {
-            const id = request.params.id;
+            const id_cliente = request.params.id;
 
-            const {cliente, contratos_desativados} = await this.#deleteCliente(id);
+            const {cliente, contratos_desativados} = await this.#deleteCliente(id_cliente);
 
-            response.status(200).json({
+            return response.status(200).json({
                 message: 'Cliente e contratos atrelados desativados com sucesso',
                 cliente,
                 contratos_desativados
             });
             
         } catch (error) {
-            if (error.statusCode === 404) return response.status(error.statusCode).json({error: error.message});
+            return response.status(error.statusCode ? error.statusCode : 500).json({error: error.message});
+        }
+    }
 
-            response.status(500).json({error: error.message});
+    async activateClienteAPI(request, response) {
+        try {
+            const id_cliente = request.params.id;
+
+            const cliente = await this.#activateCliente(id_cliente);
+
+            return response.status(200).json({
+                message: 'O cliente foi ativado com sucesso',
+                cliente
+            });
+
+        } catch (error) {
+            return response.status(error.statusCode ? error.statusCode : 500).json({error: error.message});
         }
     }
 

@@ -87,6 +87,7 @@ erDiagram
         INT id_contrato PK
         INT id_cliente FK
         INT id_cartao FK
+        TINYINT(1) contrato_ativo
         DATE dt_inicio_vigencia
         DATE dt_fim_vigencia
     }
@@ -97,6 +98,7 @@ erDiagram
         VARCHAR(20) tipo
         VARCHAR(20) bandeira
         DECIMAL anuidade
+        TINYINT(1) cartao_ativo
         DATE dt_inicio_vigencia
         DATE dt_fim_vigencia
     }

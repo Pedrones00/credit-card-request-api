@@ -23,6 +23,30 @@
                 dialog.show();
             });
         });
+
+        const form = document.querySelector('form');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const data = {
+                id_contrato: <%= contrato.id_contrato %>,
+                id_cliente: Number(form.cliente.value.split("-")[0].trim()),
+                id_cartao: Number(form.cartao.value.split("-")[0].trim())
+            };
+
+            fetch('/api/contratos', {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            }).then(async (res) => {
+                if (res.status === 200) {
+                    window.location.href = "/contratos";
+                } else {
+                    alert(await res.text());
+                }
+            });
+        });
     </script>
 </head>
 
@@ -52,8 +76,8 @@
 
                                     <el-options anchor="bottom end" popover class="max-h-60 w-(--input-width) overflow-auto rounded-md bg-white py-1 text-base shadow-lg outline outline-black/5 transition-discrete [--anchor-gap:--spacing(1)] data-leave:transition data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0 sm:text-sm dark:bg-gray-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10">
                                         <% for (const cliente of clientes) { %>
-                                            <el-option value="<%= cliente.nome %>" class="block truncate px-3 py-2 text-gray-900 select-none aria-selected:bg-indigo-600 aria-selected:text-white dark:text-gray-300 dark:aria-selected:bg-indigo-500">
-                                                <%= cliente.nome %>
+                                            <el-option value="<%= cliente.id_cliente %> - <%= cliente.nome %>" class="block truncate px-3 py-2 text-gray-900 select-none aria-selected:bg-indigo-600 aria-selected:text-white dark:text-gray-300 dark:aria-selected:bg-indigo-500">
+                                                <%= cliente.id_cliente %> - <%= cliente.nome %>
                                             </el-option>
                                             <% } %>
                                     </el-options>
@@ -73,8 +97,8 @@
 
                                     <el-options anchor="bottom end" popover class="max-h-60 w-(--input-width) overflow-auto rounded-md bg-white py-1 text-base shadow-lg outline outline-black/5 transition-discrete [--anchor-gap:--spacing(1)] data-leave:transition data-leave:duration-100 data-leave:ease-in data-closed:data-leave:opacity-0 sm:text-sm dark:bg-gray-800 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10">
                                         <% for (const cartao of cartoes) { %>
-                                            <el-option value="<%= cartao.nome %>" class="block truncate px-3 py-2 text-gray-900 select-none aria-selected:bg-indigo-600 aria-selected:text-white dark:text-gray-300 dark:aria-selected:bg-indigo-500">
-                                                <%= cartao.nome %>
+                                            <el-option value="<%= cartao.id_cartao %> - <%= cartao.nome %>" class="block truncate px-3 py-2 text-gray-900 select-none aria-selected:bg-indigo-600 aria-selected:text-white dark:text-gray-300 dark:aria-selected:bg-indigo-500">
+                                                <%= cartao.id_cartao %> - <%= cartao.nome %>
                                             </el-option>
                                             <% } %>
                                     </el-options>

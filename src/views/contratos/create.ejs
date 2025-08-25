@@ -38,7 +38,13 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
-            }).then(res => { });
+            }).then(async (res) => {
+                if (res.status === 201) {
+                    window.location.href = "/contratos";
+                } else {
+                    alert(await res.text());
+                }
+            });
         });
 
     </script>

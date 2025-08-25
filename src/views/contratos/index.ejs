@@ -91,12 +91,11 @@
                                     <div class="text-sm/6 font-medium text-gray-900 dark:text-white">Contrato <span class="text-indigo-500 dark:text-indigo-400">#<%= contrato.id_contrato %></span>
                                     </div>
                                     <div class="ml-auto">
-                                        <% const hoje=new Date(); const fimVigencia=contrato.dt_fim_vigencia ? new Date(contrato.dt_fim_vigencia) : null; const desativado=fimVigencia && fimVigencia.getTime() <=hoje.getTime(); %>
-                                            <% if (desativado) { %>
-                                                <div class="rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/10">Inativo</div>
-                                                <% } else { %>
-                                                    <div class="rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/10 ring-inset dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/10">Ativo</div>
-                                                    <% } %>
+                                        <% if (!contrato.contrato_ativo) { %>
+                                            <div class="rounded-full bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/10">Inativo</div>
+                                            <% } else { %>
+                                                <div class="rounded-full bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/10 ring-inset dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/10">Ativo</div>
+                                                <% } %>
                                     </div>
                                     <el-dropdown class="relative ml-auto">
                                         <button type="button" class="inline-flex size-8 items-center justify-center rounded-full text-gray-400 hover:text-gray-500 focus:outline-2 focus:outline-offset-2 focus:outline-indigo-600 dark:hover:text-white dark:focus:outline-white">

@@ -51,6 +51,7 @@ class ContratoController {
         if (!request.body) this.#throwError(400, 'Requisição sem corpo, é necessário o envio de informações para o cadastro de um contrato');
 
         if (!request.body.id_contrato) this.#throwError(400, 'O ID do contrato está ausente (id_contrato)');
+        if (!request.body.id_cartao && !request.body.id_cliente) this.#throwError(400, 'Sem informações para atualizar');
     }
 
     async #getActiveClientes(){
@@ -68,12 +69,7 @@ class ContratoController {
 
         const cartoes = await this.Cartao.findAll({
             where: {
-                dt_fim_vigencia: {
-                            [Op.gte]: today,
-                        },
-                        dt_inicio_vigencia: {
-                            [Op.lte]: today
-                        }
+                cartao_ativo: true,
             }
         });
 
@@ -254,18 +250,15 @@ class ContratoController {
 
     async indexPage(request, response) {
         try {
-            const activatedContrato = await this.#listAll(true, true, true);
-            const deactivatedContrato = await this.#listAll(false, true, true);
+            const contratos = await this.#listAll(null, true, true);
 
-            const contratos = [...activatedContrato, ...deactivatedContrato];
-
-            response.render("contratos/index", {
+            return response.render("contratos/index", {
                 titulo: "Contratos",
                 alerta: false,
                 contratos,
             });
         } catch (error) {
-            response.render("500", {titulo: 'Erro!', error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
     }
 
@@ -280,7 +273,7 @@ class ContratoController {
                 clientes,
             });
         } catch (error) {
-            response.render("500", {titulo: 'Erro!', error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
     }
 
@@ -291,7 +284,7 @@ class ContratoController {
             const cartoes = await this.#getActiveCartoes();
             const clientes = await this.#getActiveClientes();
 
-            response.render("contratos/read", {
+            return response.render("contratos/read", {
                 titulo: "Contratos",
                 contrato,
                 cartoes,
@@ -299,8 +292,7 @@ class ContratoController {
             });
 
         } catch (error) {
-            if (error.statusCode === 404) return response.status(404).render("404");
-            response.render("500", {titulo: 'Erro!', error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
     }
 
@@ -311,7 +303,7 @@ class ContratoController {
             const cartoes = await this.#getActiveCartoes();
             const clientes = await this.#getActiveClientes();
 
-            response.render("contratos/update", {
+            return response.render("contratos/update", {
                 titulo: "Contratos",
                 contrato,
                 cartoes,
@@ -319,8 +311,7 @@ class ContratoController {
             });
 
         } catch (error) {
-            if (error.statusCode === 404) return response.status(404).render("404");
-            response.render("500", {titulo: 'Erro!', error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
     }
 
@@ -329,19 +320,15 @@ class ContratoController {
             const id = request.params.id;
             await this.#delete(id);
             
-            const activatedContrato = await this.#listAll(true, true, true);
-            const deactivatedContrato = await this.#listAll(false, true, true);
+            const contratos = await this.#listAll(null, true, true);
 
-            const contratos = [...activatedContrato, ...deactivatedContrato];
-
-            response.render("contratos/index", {
+            return response.render("contratos/index", {
                 titulo: "Contratos",
                 alerta: true,
                 contratos
             });
         } catch (error) {
-            if (error.statusCode === 404) return response.status(404).render("404");
-            response.render("500", {titulo: 'Erro!', error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
     }
 }

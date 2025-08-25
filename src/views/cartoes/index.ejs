@@ -101,8 +101,7 @@
 
                                         <div class="w-full flex items-center justify-between pt-2">
                                             <div>
-                                                <% const hoje=new Date(); const fimVigencia=cartao.dt_fim_vigencia ? new Date(cartao.dt_fim_vigencia) : null; const desativado=fimVigencia && fimVigencia.getTime() <=hoje.getTime(); %>
-                                                    <% if (desativado) { %>
+                                                    <% if (!cartao.cartao_ativo) { %>
                                                         <div class="rounded-full w-fit bg-red-50 px-2 py-1 text-xs font-medium text-red-700 ring-1 ring-red-600/10 ring-inset dark:bg-red-500/10 dark:text-red-400 dark:ring-red-500/10">Inativo</div>
                                                         <% } else { %>
                                                             <div class="rounded-full w-fit bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-green-600/10 ring-inset dark:bg-green-500/10 dark:text-green-400 dark:ring-green-500/10">Ativo</div>

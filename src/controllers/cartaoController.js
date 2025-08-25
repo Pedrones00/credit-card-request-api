@@ -188,7 +188,7 @@ class CartaoController {
         try {
             const newCartao = await this.#register(request);
 
-            return response.status(200).json(newCartao);
+            return response.status(201).json(newCartao);
             
         } catch (error) {
             return response.status(error.statusCode? error.statusCode : 500).json({error: error.message});
@@ -228,23 +228,23 @@ class CartaoController {
 
     async indexPage(request, response) {
         try {
-            const cartoes = await this.#listAll(true, false, false);
+            const cartoes = await this.#listAll(null, false, false);
 
-            response.render("cartoes/index", {
+            return response.render("cartoes/index", {
                 titulo: "Cartões",
                 alerta: false,
                 cartoes,
             });
         } catch (error) {
-            response.render("500", {error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
     }
 
     async registerPage(request, response) {
         try {
-            response.render("cartoes/create", { titulo: "Cartões" });
+            return response.render("cartoes/create", { titulo: "Cartões" });
         } catch (error) {
-            response.render("500", {error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
     }
 
@@ -253,26 +253,26 @@ class CartaoController {
             const id = request.params.id;
             const cartao = await this.#searchID(id, false, false);
 
-            response.render("cartoes/read", {
+            return response.render("cartoes/read", {
                 titulo: "Cartões",
                 cartao,
             });
         } catch (error) {
-            response.render("500", {error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
     }
 
     async editPage(request, response) {
         try {
             const id = request.params.id
-            const cartao = await this.#searchID(id);
+            const cartao = await this.#searchID(id, false, false);
 
-            response.render("cartoes/update", {
+            return response.render("cartoes/update", {
                 titulo: "Cartões",
                 cartao,
             });
         } catch (error) {
-            response.render("500", {error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
     }
 
@@ -282,15 +282,15 @@ class CartaoController {
 
             const {cartao, contratos_desativados} = await this.#deleteCartao(id);
 
-            const cartoes = await this.#listAll(true, false, false);
+            const cartoes = await this.#listAll(null, false, false);
 
-            response.render("cartoes/index", {
+            return response.render("cartoes/index", {
                 titulo: "Cartões",
                 alerta: true,
                 cartoes,
             });
         } catch (error) {
-            response.render("500", {error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
     }
 

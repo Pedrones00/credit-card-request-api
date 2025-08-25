@@ -23,6 +23,32 @@
                 dialog.show();
             });
         });
+
+        const form = document.querySelector('form');
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const data = {
+                id_cliente: <%= cliente.id_cliente %>,
+                nome: form.nome.value,
+                cpf: form.cpf.value,
+                email: form.email.value,
+                dt_nascimento: form.dt_nascimento.value,
+            };
+
+            fetch('/api/clientes', {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data),
+            }).then(async (res) => {
+                if (res.status === 200) {
+                    window.location.href = "/clientes";
+                } else {
+                    alert(await res.text());
+                }
+            });
+        });
     </script>
 </head>
 

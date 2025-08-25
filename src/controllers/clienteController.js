@@ -138,7 +138,7 @@ class ClienteController {
         const cliente = await this.Cliente.findByPk(request.body.id_cliente);
         if (!cliente) this.#throwError(404, 'Cliente não encontrado');
 
-        if (request.body.cpf) await this.#validateDuplicateCPF(request.body.cpf);
+        if (request.body.cpf && request.body.cpf !== cliente.cpf) await this.#validateDuplicateCPF(request.body.cpf);
             
         await cliente.update(request.body, this.mutableRequestFields);
 
@@ -277,28 +277,25 @@ class ClienteController {
 
     async indexPage(request, response) {
         try {
-            const activatedClientes = await this.#listAll(true, null, false, false);
-            const deactivatedClientes = await this.#listAll(false, null, false, false);
+            const clientes = await this.#listAll(null, null, false, false);
 
-            const clientes = [...activatedClientes, ...deactivatedClientes];
-
-            response.render("clientes/index", {
+            return response.render("clientes/index", {
                 titulo: "Clientes",
                 alerta: false,
                 clientes,
             });
 
         } catch (error) {
-            response.render("500", {error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
         
     }
 
     async registerPage(request, response) {
         try {
-            response.render("clientes/create", { titulo: "Clientes" });
+            return response.render("clientes/create", { titulo: "Clientes" });
         } catch (error) {
-            response.render("500", {error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
     }
 
@@ -307,13 +304,12 @@ class ClienteController {
             const id = request.params.id;
             const cliente = await this.#searchID(id, false, false);
 
-            response.render("clientes/read", {
+            return response.render("clientes/read", {
                 titulo: "Clientes",
                 cliente,
                 });
         } catch (error) {
-            if (error.statusCode === 404) return response.render("404", {error});
-            response.render("500", {error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
     }
 
@@ -322,13 +318,12 @@ class ClienteController {
             const id = request.params.id;
             const cliente = await this.#searchID(id, false, false);
 
-            response.render("clientes/update", {
+            return response.render("clientes/update", {
                 titulo: "Clientes",
                 cliente,
             });
         } catch (error) {
-            if (error.statusCode === 404) return response.render("404", {error});
-            response.render("500", {error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
     }
 
@@ -337,19 +332,15 @@ class ClienteController {
             const id = request.params.id;
             const {cliente, contratos_ativos} = await this.#deleteCliente(id);
             
-            const activatedClientes = await this.#listAll(true, null, false, false);
-            const deactivatedClientes = await this.#listAll(false, null, false, false);
+            const clientes = await this.#listAll(null, null, false, false);
 
-            const clientes = [...activatedClientes, ...deactivatedClientes];
-
-            response.render("clientes/index", {
+            return response.render("clientes/index", {
                 titulo: "Clientes",
                 alerta: true,
                 clientes,
             });
         } catch (error) {
-            if (error.statusCode === 404) return response.render("404", {error});
-            response.render("500", {error});
+            return response.render("500", {titulo: 'Erro!', error});
         }
     }
 }

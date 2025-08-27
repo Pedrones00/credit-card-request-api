@@ -1,0 +1,476 @@
+paths:
+  /api/cartoes:
+    get:
+      summary: Lista todos os cartões
+      tags:
+        - Cartoes
+      parameters:
+        - name: active
+          in: query
+          description: Filtra cartões ativos ou inativos
+          required: false
+          schema:
+            type: string
+            enum: ["true", "false"]
+        - name: details
+          in: query
+          description: Define detalhes adicionais como 'contrato' e/ou 'cliente'
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum: ["contrato", "cliente"]
+      responses:
+        '200':
+          description: Lista de cartões
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id_cartao:
+                      type: integer
+                      example: 1
+                    nome:
+                      type: string
+                      example: Mastercard Black
+                    tipo:
+                      type: string
+                      example: credito
+                    bandeira:
+                      type: string
+                      example: Mastercard
+                    anuidade:
+                      type: number
+                      example: 80.5
+                    cartao_ativo:
+                      type: boolean
+                      example: true
+                    dt_inicio_vigencia:
+                      type: string
+                      format: date-time
+                      example: 2025-08-24T20:47:02.000Z
+                    dt_fim_vigencia:
+                      type: string
+                      format: date-time
+                      example: null
+                    contrato:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id_contrato:
+                            type: integer
+                            example: 2
+                          id_cliente:
+                            type: integer
+                            example: 1
+                          contrato_ativo:
+                            type: boolean
+                            example: true
+                          dt_inicio_vigencia:
+                            type: string
+                            format: date-time
+                            example: 2025-08-24T20:47:02.000Z
+                          dt_fim_vigencia:
+                            type: string
+                            format: date-time
+                            example: null
+                          cliente:
+                            type: object
+                            properties:
+                              id_cliente:
+                                type: integer
+                                example: 1
+                              nome:
+                                type: string
+                                example: João Silva
+                              cpf:
+                                type: string
+                                example: 12345678901
+                              email:
+                                type: string
+                                example: joao@example.com
+                              dt_nascimento:
+                                type: date
+                                example: "1990-20-05"
+                              cpf_regular:
+                                type: boolean
+                                example: true
+                              cliente_ativo:
+                                type: boolean
+                                example: true
+                    
+    post:
+      summary: Cadastra um novo cartão
+      tags:
+        - Cartoes
+      requestBody:
+        description: Dados do cartão
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nome
+                - tipo
+                - bandeira
+              properties:
+                nome:
+                  type: string
+                  example: Visa Platinum
+                tipo:
+                  type: string
+                  example: credito
+                bandeira:
+                  type: string
+                  example: Visa
+                anuidade:
+                  type: number
+                  example: 80.5
+                  default: 0
+      responses:
+        '201':
+          description: Cartão criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id_cartao:
+                    type: integer
+                    example: 1
+                  nome:
+                    type: string
+                    example: Mastercard Black
+                  tipo:
+                    type: string
+                    example: credito
+                  bandeira:
+                    type: string
+                    example: Mastercard
+                  anuidade:
+                    type: number
+                    example: 80.5
+                  cartao_ativo:
+                    type: boolean
+                    example: true
+                  dt_inicio_vigencia:
+                    type: string
+                    format: date-time
+                    example: 2025-08-24T20:47:02.000Z
+                  dt_fim_vigencia:
+                    type: string
+                    format: date-time
+                    example: null
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Campos obrigatórios não preenchidos: [nome: nome do cartão, tipo: tipo do cartão]"
+
+    patch:
+      summary: Atualiza um cartão
+      tags:
+        - Cartoes
+      requestBody:
+        description: Dados para atualização
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id_cartao
+              properties:
+                id_cartao:
+                  type: integer
+                  example: 1
+                nome:
+                  type: string
+                  example: Mastercard Gold
+                tipo:
+                  type: string
+                  example: Crédito
+                bandeira:
+                  type: string
+                  example: Mastercard
+                anuidade:
+                  type: number
+                  example: 300
+      responses:
+        '200':
+          description: Cartão atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Cartão atualizado com sucesso
+                  cartão:
+                    type: object
+                    properties:
+                      id_cartao:
+                        type: integer
+                        example: 1
+                      nome:
+                        type: string
+                        example: Mastercard Black
+                      tipo:
+                        type: string
+                        example: credito
+                      bandeira:
+                        type: string
+                        example: Mastercard
+                      anuidade:
+                        type: number
+                        example: 80.5
+                      cartao_ativo:
+                        type: boolean
+                        example: true
+                      dt_inicio_vigencia:
+                        type: string
+                        format: date-time
+                        example: 2025-08-24T20:47:02.000Z
+                      dt_fim_vigencia:
+                        type: string
+                        format: date-time
+                        example: null
+        '400':
+          description: Dados inválidos ou cartão desativado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: O id do cartão está ausente (id_cartao)
+        '404':
+          description: Cartão não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Cartão não encontrato
+
+  /api/cartoes/{id}:
+    get:
+      summary: Busca cartão por ID
+      tags:
+        - Cartoes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: details
+          in: query
+          description: Define detalhes adicionais como 'contrato' e/ou 'cliente'
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum: ["contrato", "cliente"]
+      responses:
+        '200':
+          description: Cartão encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id_cartao:
+                    type: integer
+                    example: 1
+                  nome:
+                    type: string
+                    example: Mastercard Black
+                  tipo:
+                    type: string
+                    example: credito
+                  bandeira:
+                    type: string
+                    example: Mastercard
+                  anuidade:
+                    type: number
+                    example: 80.5
+                  cartao_ativo:
+                    type: boolean
+                    example: true
+                  dt_inicio_vigencia:
+                    type: string
+                    format: date-time
+                    example: 2025-08-24T20:47:02.000Z
+                  dt_fim_vigencia:
+                    type: string
+                    format: date-time
+                    example: null
+                  contrato:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id_contrato:
+                          type: integer
+                          example: 2
+                        id_cliente:
+                          type: integer
+                          example: 1
+                        contrato_ativo:
+                          type: boolean
+                          example: true
+                        dt_inicio_vigencia:
+                          type: string
+                          format: date-time
+                          example: 2025-08-24T20:47:02.000Z
+                        dt_fim_vigencia:
+                          type: string
+                          format: date-time
+                          example: null
+                        cliente:
+                          type: object
+                          properties:
+                            id_cliente:
+                              type: integer
+                              example: 1
+                            nome:
+                              type: string
+                              example: João Silva
+                            cpf:
+                              type: string
+                              example: 12345678901
+                            email:
+                              type: string
+                              example: joao@example.com
+                            dt_nascimento:
+                              type: date
+                              example: "1990-20-05"
+                            cpf_regular:
+                              type: boolean
+                              example: true
+                            cliente_ativo:
+                              type: boolean
+                              example: true
+        '404':
+          description: Cartão não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Cartão não encontrado
+
+    delete:
+      summary: Desativa um cartão e contratos relacionados
+      tags:
+        - Cartoes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cartão e contratos desativados com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: O cartão e seus contratos relacionados foram desativados
+                  cartao:
+                    type: object
+                    properties:
+                      id_cartao:
+                        type: integer
+                        example: 1
+                      nome:
+                        type: string
+                        example: Mastercard Black
+                      tipo:
+                        type: string
+                        example: credito
+                      bandeira:
+                        type: string
+                        example: Mastercard
+                      anuidade:
+                        type: number
+                        example: 80.5
+                      cartao_ativo:
+                        type: boolean
+                        example: false
+                      dt_inicio_vigencia:
+                        type: string
+                        format: date-time
+                        example: 2025-08-24T20:47:02.000Z
+                      dt_fim_vigencia:
+                        type: string
+                        format: date-time
+                        example: 2025-08-25T20:47:02.000Z
+                  contratos:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        item:
+                          type: object
+                          properties:
+                            id_contrato:
+                              type: integer
+                              example: 2
+                            id_cliente:
+                              type: integer
+                              example: 1
+                            contrato_ativo:
+                              type: boolean
+                              example: false
+                            dt_inicio_vigencia:
+                              type: string
+                              format: date-time
+                              example: 2025-08-24T20:47:02.000Z
+                            dt_fim_vigencia:
+                              type: string
+                              format: date-time
+                              example: 2025-08-25T20:47:02.000Z
+        '400':
+          description: Cartão já desativado
+          content:
+            application/json:
+              schema:
+                item: object
+                properties:
+                  error:
+                    type: string
+                    example: O cartão já estava desativado, nenhuma modificação foi realizada
+        '404':
+          description: Cartão não encontrado
+          content:
+            application/json:
+              schema:
+                item: object
+                properties:
+                  error:
+                    type: string
+                    example: Cartão não encontrado

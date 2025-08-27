@@ -1,0 +1,426 @@
+paths:
+  /api/contratos:
+    get:
+      summary: Lista todos os contratos
+      tags:
+        - Contratos
+      parameters:
+        - name: active
+          in: query
+          description: Filtra contratos ativos ou inativos
+          required: false
+          schema:
+            type: string
+            enum: ["true", "false"]
+        - name: details
+          in: query
+          description: Define detalhes adicionais como 'cliente' e/ou 'cartao'
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum: ["cliente", "cartao"]
+      responses:
+        '200':
+          description: Lista de contratos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id_contrato:
+                      type: integer
+                      example: 1
+                    id_cliente:
+                      type: integer
+                      example: 1
+                    id_cartao:
+                      type: integer
+                      example: 2
+                    contrato_ativo:
+                      type: boolean
+                      example: true
+                    dt_inicio_vigencia:
+                      type: string
+                      format: date-time
+                      example: 2025-12-31T23:59:59.000Z
+                    dt_fim_vigencia:
+                      type: string
+                      format: date-time
+                      example: null
+                    cartao:
+                      type: object
+                      properties:
+                        id_cartao:
+                          type: integer
+                          example: 1
+                        nome:
+                          type: string
+                          example: 'Visa Infinite'
+                        tipo:
+                          type: string
+                          example: credito
+                        bandeira:
+                          type: string
+                          example: Visa
+                        anuidade:
+                          type: number
+                          format: double
+                          example: 80.00
+                        cartao_ativo:
+                          type: boolean
+                          example: true
+                        dt_inicio_vigencia:
+                          type: string
+                          format: date-time
+                          example: 2025-08-24T20:47:02.000Z
+                        dt_fim_vigencia:
+                          type: string
+                          format: date-time
+                          example: null
+                    cliente:
+                      type: object
+                      properties:
+                        id_cliente:
+                          type: integer
+                          example: 1
+                        nome:
+                          type: string
+                          example: João Silva
+                        cpf:
+                          type: string
+                          example: 12345678901
+                        email:
+                          type: string
+                          example: joao@example.com
+                        dt_nascimento:
+                          type: date
+                          example: "1990-20-05"
+                        cpf_regular:
+                          type: boolean
+                          example: true
+                        cliente_ativo:
+                          type: boolean
+                          example: true
+
+    post:
+      summary: Cadastra um novo contrato
+      tags:
+        - Contratos
+      requestBody:
+        description: Dados do contrato
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id_cliente
+                - id_cartao
+              properties:
+                id_cliente:
+                  type: integer
+                  example: 1
+                id_cartao:
+                  type: integer
+                  example: 2
+      responses:
+        '201':
+          description: Contrato criado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id_contrato:
+                    typer: integer
+                    example: 3
+                  id_cliente:
+                    type: integer
+                    example: 1
+                  id_cartao:
+                    type: integer
+                    example: 2
+                  contrato_ativo:
+                    type: boolean
+                    example: true
+                  dt_inicio_vigencia:
+                    type: string
+                    format: date-time
+                    example: 2025-05-31T23:59:59.000Z
+                  dt_fim_vigencia:
+                    type: string
+                    format: date-time
+                    example: null
+        '400':
+          description: Dados inválidos ou cliente/cartão inativos ou inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Campos obrigatórios não preenchidos: [id_cartao: id do cartão a ser cadastrado]"
+
+    patch:
+      summary: Atualiza um contrato
+      tags:
+        - Contratos
+      requestBody:
+        description: Dados para atualização
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id_contrato
+              properties:
+                id_contrato:
+                  type: integer
+                  example: 1
+                id_cliente:
+                  type: integer
+                  example: 1
+                id_cartao:
+                  type: integer
+                  example: 2
+      responses:
+        '200':
+          description: Contrato atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Contrato atualizado com sucesso
+                  contrato:
+                    type: object
+                    properties:
+                      id_contrato:
+                        typer: integer
+                        example: 3
+                      id_cliente:
+                        type: integer
+                        example: 1
+                      id_cartao:
+                        type: integer
+                        example: 2
+                      contrato_ativo:
+                        type: boolean
+                        example: true
+                      dt_inicio_vigencia:
+                        type: string
+                        format: date-time
+                        example: 2025-05-31T23:59:59.000Z
+                      dt_fim_vigencia:
+                        type: string
+                        format: date-time
+                        example: null
+        '400':
+          description: Dados inválidos ou contrato desativado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Campos inválidos: [Cartão não existe, Cliente está desativado]"
+        '404':
+          description: Contrato não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Contrato não encontrado
+
+  /api/contratos/{id}:
+    get:
+      summary: Busca contrato por ID
+      tags:
+        - Contratos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: details
+          in: query
+          description: Define detalhes adicionais como 'cliente' e/ou 'cartao'
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum: ["cliente", "cartao"]
+      responses:
+        '200':
+          description: Contrato encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  contrato:
+                    type: object
+                    properties:
+                      id_contrato:
+                        type: integer
+                        example: 1
+                      id_cliente:
+                        type: integer
+                        example: 1
+                      id_cartao:
+                        type: integer
+                        example: 2
+                      contrato_ativo:
+                        type: boolean
+                        example: true
+                      dt_inicio_vigencia:
+                        type: string
+                        format: date-time
+                        example: 2025-12-31T23:59:59.000Z
+                      dt_fim_vigencia:
+                        type: string
+                        format: date-time
+                        example: null
+                      cartao:
+                        type: object
+                        properties:
+                          id_cartao:
+                            type: integer
+                            example: 1
+                          nome:
+                            type: string
+                            example: 'Visa Infinite'
+                          tipo:
+                            type: string
+                            example: credito
+                          bandeira:
+                            type: string
+                            example: Visa
+                          anuidade:
+                            type: number
+                            format: double
+                            example: 80.00
+                          cartao_ativo:
+                            type: boolean
+                            example: true
+                          dt_inicio_vigencia:
+                            type: string
+                            format: date-time
+                            example: 2025-08-24T20:47:02.000Z
+                          dt_fim_vigencia:
+                            type: string
+                            format: date-time
+                            example: null
+                      cliente:
+                        type: object
+                        properties:
+                          id_cliente:
+                            type: integer
+                            example: 1
+                          nome:
+                            type: string
+                            example: João Silva
+                          cpf:
+                            type: string
+                            example: 12345678901
+                          email:
+                            type: string
+                            example: joao@example.com
+                          dt_nascimento:
+                            type: date
+                            example: "1990-20-05"
+                          cpf_regular:
+                            type: boolean
+                            example: true
+                          cliente_ativo:
+                            type: boolean
+                            example: true
+        '404':
+          description: Contrato não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Contrato não encontrato
+
+    delete:
+      summary: Desativa um contrato
+      tags:
+        - Contratos
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Contrato desativado com sucesso
+          content:
+            application/json:
+              type: object
+              properties:
+                message:
+                  type: string
+                  example: O contrato está desativado
+                contrato:
+                  type: object
+                  properties:
+                    id_contrato:
+                      type: integer
+                      example: 1
+                    id_cliente:
+                      type: integer
+                      example: 1
+                    id_cartao:
+                      type: integer
+                      example: 2
+                    contrato_ativo:
+                      type: boolean
+                      example: false
+                    dt_inicio_vigencia:
+                      type: string
+                      format: date-time
+                      example: 2025-06-31T23:59:59.000Z
+                    dt_fim_vigencia:
+                      type: string
+                      format: date-time
+                      example: 2025-07-31T23:59:59.000Z
+
+        '400':
+          description: Contrato já desativado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: O contrato já estava desativado, nenhuma modificação foi realizada
+        '404':
+          description: Contrato não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Contrato não encontrato

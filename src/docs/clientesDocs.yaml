@@ -1,0 +1,570 @@
+paths:
+  /api/clientes:
+    get:
+      summary: Lista todos os clientes
+      tags:
+        - Clientes
+      parameters:
+        - name: cpf
+          in: query
+          description: Filtra por CPF
+          required: false
+          schema:
+            type: string
+        - name: active
+          in: query
+          description: Filtra clientes ativos ou inativos
+          required: false
+          schema:
+            type: string
+            enum: ["true", "false"]
+        - name: details
+          in: query
+          description: Define detalhes adicionais como 'contrato' e/ou 'cartão'
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum: ["contrato", "cartao"]
+      responses:
+        '200':
+          description: Lista de clientes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id_cliente:
+                      type: integer
+                      example: 1
+                    nome:
+                      type: string
+                      example: João Silva
+                    cpf:
+                      type: string
+                      example: 12345678901
+                    email:
+                      type: string
+                      example: joao@example.com
+                    dt_nascimento:
+                      type: date
+                      example: "1990-20-05"
+                    cpf_regular:
+                      type: boolean
+                      example: true
+                    cliente_ativo:
+                      type: boolean
+                      example: true
+                    contrato:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id_contrato:
+                            type: integer
+                            example: 2
+                          id_cliente:
+                            type: integer
+                            example: 1
+                          id_cartao:
+                            type: integer
+                            example: 2
+                          contrato_ativo:
+                            type: boolean
+                            example: true
+                          dt_inicio_vigencia:
+                            type: string
+                            format: date-time
+                            example: 2025-08-24T20:47:02.000Z
+                          dt_fim_vigencia:
+                            type: string
+                            format: date-time
+                            example: null
+                          cartao:
+                            type: object
+                            properties:
+                              id_cartao:
+                                type: integer
+                                example: 1
+                              nome:
+                                type: string
+                                example: 'Visa Infinite'
+                              tipo:
+                                type: string
+                                example: credito
+                              bandeira:
+                                type: string
+                                example: Visa
+                              anuidade:
+                                type: number
+                                format: double
+                                example: 80.00
+                              cartao_ativo:
+                                type: boolean
+                                example: true
+                              dt_inicio_vigencia:
+                                type: string
+                                format: date-time
+                                example: 2025-08-24T20:47:02.000Z
+                              dt_fim_vigencia:
+                                type: string
+                                format: date-time
+                                example: null
+
+    post:
+      summary: Cadastra um novo cliente
+      tags:
+        - Clientes
+      requestBody:
+        description: Dados do cliente
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - nome
+                - cpf
+                - dt_nascimento
+              properties:
+                nome:
+                  type: string
+                  example: Maria Souza
+                cpf:
+                  type: string
+                  example: 98765432100
+                email:
+                  type: string
+                  example: maria@example.com
+                dt_nascimento:
+                  type: string
+                  format: date
+                  example: "1990-05-20"
+                cpf_regular:
+                  type: boolean
+                  example: true
+                  default: true
+                cliente_ativo:
+                  type: boolean
+                  example: true
+                  default: true
+      responses:
+        '201':
+          description: Cliente cadastrado com sucesso
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    message:
+                      type: string
+                      example: Cliente cadastrado com sucesso
+                    cliente:
+                      type: object
+                      properties:
+                        id_cliente:
+                          type: integer
+                          example: 1
+                        nome:
+                          type: string
+                          example: João Silva
+                        cpf:
+                          type: string
+                          example: 12345678901
+                        email:
+                          type: string
+                          example: joao@example.com
+                        dt_nascimento:
+                          type: date
+                          example: '2000-05-20'
+                        cpf_regular:
+                          type: boolean
+                          example: true
+                          default: true
+                        cliente_ativo:
+                          type: boolean
+                          example: true
+                          default: true
+        '400':
+          description: Dados inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Campos obrigatórios não preenchidos: [nome: nome do cliente, cpf: cpf do cliente]"
+        '409':
+          description: CPF duplicado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: CPF já existe na base para o cliente id 3
+
+    patch:
+      summary: Atualiza um cliente
+      tags:
+        - Clientes
+      requestBody:
+        description: Dados para atualização
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - id_cliente
+              properties:
+                id_cliente:
+                  type: integer
+                  example: 1
+                nome:
+                  type: string
+                  example: João Silva
+                email:
+                  type: string
+                  example: joao_atualizado@example.com
+                cpf:
+                  type: string
+                  example: 12345678901
+                dt_nascimento:
+                  type: date
+                  example: '2000-05-20'
+      responses:
+        '200':
+          description: Cliente atualizado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'Cliente atualizado com sucesso'
+                  cliente:
+                    type: object
+                    properties:                    
+                      id_cliente:
+                        type: integer
+                        example: 1
+                      nome:
+                        type: string
+                        example: João Silva
+                      cpf:
+                        type: string
+                        example: 12345678901
+                      email:
+                        type: string
+                        example: joao@example.com
+                      dt_nascimento:
+                        type: date
+                        example: '2000-05-20'
+                      cpf_regular:
+                        type: boolean
+                        example: true
+                      cliente_ativo:
+                        type: boolean
+                        example: true
+        '400':
+          description: Informações ausentes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: O ID do cliente está ausente (id_cliente)
+        '404':
+          description: Cliente não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Cliente não encontrado
+
+  /api/clientes/{id}:
+    get:
+      summary: Busca cliente por ID
+      tags:
+        - Clientes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: details
+          in: query
+          description: Define detalhes adicionais como 'contrato' e/ou 'cartao'
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum: ["contrato", "cartao"]
+      responses:
+        '200':
+          description: Cliente encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id_cliente:
+                    type: integer
+                    example: 1
+                  nome:
+                    type: string
+                    example: João Silva
+                  cpf:
+                    type: string
+                    example: 12345678901
+                  email:
+                    type: string
+                    example: joao@example.com
+                  dt_nascimento:
+                    type: date
+                    example: '2000-05-20'
+                  cpf_regular:
+                    type: boolean
+                    example: true
+                  cliente_ativo:
+                    type: boolean
+                    example: true
+                  contrato:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id_contrato:
+                          type: integer
+                          example: 2
+                        id_cliente:
+                          type: integer
+                          example: 1
+                        id_cartao:
+                          type: integer
+                          example: 2
+                        contrato_ativo:
+                          type: boolean
+                          example: true
+                        dt_inicio_vigencia:
+                          type: string
+                          format: date-time
+                          example: 2025-08-24T20:47:02.000Z
+                        dt_fim_vigencia:
+                          type: string
+                          format: date-time
+                          example: null
+                        cartao:
+                          type: object
+                          properties:
+                            id_cartao:
+                              type: integer
+                              example: 1
+                            nome:
+                              type: string
+                              example: 'Visa Infinite'
+                            tipo:
+                              type: string
+                              example: credito
+                            bandeira:
+                              type: string
+                              example: Visa
+                            anuidade:
+                              type: number
+                              format: double
+                              example: 80.00
+                            cartao_ativo:
+                              type: boolean
+                              example: true
+                            dt_inicio_vigencia:
+                              type: string
+                              format: date-time
+                              example: 2025-08-24T20:47:02.000Z
+                            dt_fim_vigencia:
+                              type: string
+                              format: date-time
+                              example: null
+        '404':
+          description: Cliente não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Cliente não encontrado
+
+    delete:
+      summary: Desativa um cliente e seus contratos atrelados
+      tags:
+        - Clientes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cliente e contratos desativados com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Cliente e contratos atrelados desativados com sucesso
+                  cliente:
+                    type: object
+                    properties:
+                      id_cliente:
+                        type: integer
+                        example: 1
+                      nome:
+                        type: string
+                        example: João Silva
+                      cpf:
+                        type: string
+                        example: 12345678901
+                      email:
+                        type: string
+                        example: joao@example.com
+                      dt_nascimento:
+                        type: date
+                        example: '2000-05-20'
+                      cpf_regular:
+                        type: boolean
+                        example: true
+                      cliente_ativo:
+                        type: boolean
+                        example: false
+                    contrato:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          id_contrato:
+                            type: integer
+                            example: 2
+                          id_cliente:
+                            type: integer
+                            example: 1
+                          id_cartao:
+                            type: integer
+                            example: 2
+                          contrato_ativo:
+                            type: boolean
+                            example: false
+                          dt_inicio_vigencia:
+                            type: string
+                            format: date-time
+                            example: 2025-08-24T20:47:02.000Z
+                          dt_fim_vigencia:
+                            type: string
+                            format: date-time
+                            example: 2025-08-28T20:47:02.000Z
+        '400':
+          description: Cliente já desativado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: O cliente já está desativado, nenhuma modificação foi realizada
+        '404':
+          description: Cliente não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Cliente não encontrado
+
+  /api/clientes/activate/{id}:
+    patch:
+      summary: Ativa um cliente
+      tags:
+        - Clientes
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Cliente ativado com sucesso
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 'O cliente foi ativado com sucesso'
+                  cliente:
+                    type: object
+                    properties:
+                      id_cliente:
+                        type: integer
+                        example: 1
+                      nome:
+                        type: string
+                        example: João Silva
+                      cpf:
+                        type: string
+                        example: 12345678901
+                      email:
+                        type: string
+                        example: joao@example.com
+                      dt_nascimento:
+                        type: date
+                        example: '2000-05-20'
+                      cpf_regular:
+                        type: boolean
+                        example: true
+                      cliente_ativo:
+                        type: boolean
+                        example: true
+        '400':
+          description: Cliente já ativo
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Cliente já está ativo, nenhuma modificação foi realizada
+        '404':
+          description: Cliente não encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Cliente não encontrado

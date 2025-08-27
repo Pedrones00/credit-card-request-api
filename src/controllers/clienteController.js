@@ -70,7 +70,7 @@ class ClienteController {
                 where: {cpf: cpf_cliente}
             });
 
-        if (cpfInUse) this.#throwError(404, `CPF já existe na base para o cliente id ${cpfInUse.id_cliente}`);
+        if (cpfInUse) this.#throwError(409, `CPF já existe na base para o cliente id ${cpfInUse.id_cliente}`);
     }
 
     async #disableContratos(id_cliente) {
@@ -101,8 +101,6 @@ class ClienteController {
                 },
                 include: this.#createSequelizeIncludeArrays(detailsContrato, detailsCartao),
             });
-        
-        if (!clientes && cpfCliente) this.#throwError(404, 'Cliente não encontrado');
 
         return clientes;
     }

@@ -284,25 +284,38 @@ class ClienteController {
         .status(error.statusCode ? error.statusCode : 500)
         .json({ error: error.message });
     }
-  }
 
-  async deleteClienteAPI(request, response) {
-    try {
-      const id_cliente = request.params.id;
+    async #disableContratos(id_cliente) {
+    
+            let today = this.#getToday();
+            
+            const contratos_ativos = await this.Contrato.findAll({
+                where: {
+                    id_cliente: id_cliente,
+                    contrato_ativo : true
+                }
+            });
+    
+            for (const contrato of contratos_ativos) {
+                contrato.dt_fim_vigencia = today;
+                contrato.contrato_ativo = false;
+                await contrato.save();
+            }
+    
+            return contratos_ativos;
+        }
 
-      const { cliente, contratos_desativados } = await this.#deleteCliente(
-        id_cliente
-      );
+    async #listAll(clienteState = null, cpfCliente = null, detailsContrato = false, detailsCartao = false) {
 
-      return response.status(200).json({
-        message: "Cliente e contratos atrelados desativados com sucesso",
-        cliente,
-        contratos_desativados,
-      });
-    } catch (error) {
-      return response
-        .status(error.statusCode ? error.statusCode : 500)
-        .json({ error: error.message });
+        const clientes = await this.Cliente.findAll({
+                where: {
+                    ...(clienteState === null ? {} : {cliente_ativo: clienteState}),
+                    ...(cpfCliente ? {cpf: cpfCliente} : {}),
+                },
+                include: this.#createSequelizeIncludeArrays(detailsContrato, detailsCartao),
+            });
+
+        return clientes;
     }
   }
 

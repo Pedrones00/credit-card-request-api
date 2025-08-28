@@ -80,12 +80,13 @@ class ClienteController {
             const contratos_ativos = await this.Contrato.findAll({
                 where: {
                     id_cliente: id_cliente,
-                    dt_fim_vigencia : {[Op.gte]:today}
+                    contrato_ativo : true
                 }
             });
     
             for (const contrato of contratos_ativos) {
                 contrato.dt_fim_vigencia = today;
+                contrato.contrato_ativo = false;
                 await contrato.save();
             }
     

@@ -37,9 +37,9 @@
             };
 
             fetch('/api/cartoes', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
             }).then(async (res) => {
                 if (res.status === 201) {
                     window.location.href = "/cartoes";
@@ -62,7 +62,7 @@
                 <div class="mx-auto max-w-3xl">
                     <h2 class="font-medium text-xl text-gray-500 dark:text-white">Cadastro de cartão de crédito</h2>
 
-                    <form class="bg-white max-w-2xl rounded-lg shadow-xs outline outline-gray-900/5 sm:rounded-xl md:col-span-2 dark:bg-gray-800/50 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10 mt-3">
+                    <form class="bg-white max-w-2xl rounded-lg shadow-xs outline outline-gray-900/5 sm:rounded-xl md:col-span-2 dark:bg-gray-800/50 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10 mt-6">
                         <!-- Form fields -->
                         <div class="px-4 py-6 sm:p-8">
                             <!-- Nome-->
@@ -154,7 +154,7 @@
                                 </div>
                             </div>
                             <div class=" px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6">
-                                <a href="/cartoes" command="close" commandfor="dialog" class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto dark:bg-red-500 dark:shadow-none dark:hover:bg-red-400">Descartar</a>
+                                <a onclick="window.history.back()" command="close" commandfor="dialog" class="inline-flex w-full justify-center rounded-md bg-red-600 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-red-500 sm:ml-3 sm:w-auto dark:bg-red-500 dark:shadow-none dark:hover:bg-red-400">Descartar</a>
                                 <button type="button" command="close" commandfor="dialog" class="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs inset-ring-1 inset-ring-gray-300 hover:bg-gray-50 sm:mt-0 sm:w-auto dark:bg-white/10 dark:text-white dark:shadow-none dark:inset-ring-white/5 dark:hover:bg-white/20">Continuar o cadastro</button>
                             </div>
                         </el-dialog-panel>

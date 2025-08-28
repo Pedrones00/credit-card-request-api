@@ -5,19 +5,21 @@ Este Tech Challenge teve como objetivo desenvolver um sistema para gerenciamento
 ## Sumário
 
 - [Tech Challenge](#tech-challenge)
-  - [Sumário](#sumario)
+  - [Sumário](#sumário)
   - [Tecnologias utilizadas](#tecnologias-utilizadas)
     - [Front-end](#front-end)
     - [Back-end](#back-end)
   - [Arquitetura de software](#arquitetura-de-software)
-    - [Estrutura do repositório](#estrutura-do-repositorio)
+    - [Estrutura do repositório](#estrutura-do-repositório)
   - [Modelos de dados](#modelos-de-dados)
-  - [Instalação e Configuração](#instalacao-e-configuracao)
-  - [Documentação da API](#documentacao-da-api) ([Swagger](http://localhost:3000/api/docs))
-  - [Endpoints Disponíveis](#endpoints-disponiveis)
-    - [Cartões (/api/cartoes)](#cartoes-apicartoes)
-    - [Clientes (/api/clientes)](#clientes-apiclientes)
-    - [Contratos (/api/contratos)](#contratos-apicontratos)
+  - [Instalação e Configuração](#instalação-e-configuração)
+    - [Pré-requisitos](#pré-requisitos)
+    - [Como instalar](#como-instalar)
+  - [Documentação da API](#documentação-da-api)
+  - [Endpoints Disponíveis](#endpoints-disponíveis)
+    - [Cartões (`/api/cartoes`)](#cartões-apicartoes)
+    - [Clientes (`/api/clientes`)](#clientes-apiclientes)
+    - [Contratos (`/api/contratos`)](#contratos-apicontratos)
 
 ## Tecnologias utilizadas
 
@@ -61,38 +63,38 @@ A organização do repositório refleta a arquitetura escolhida.
 │   │   └── dbconnection.js
 │   ├── docs                    # Documentação da API em formato OpenAPI/Swagger
 │   │   ├── cartoesDocs.yaml
-│   │   ├── clientesDocs.yaml 
+│   │   ├── clientesDocs.yaml
 │   │   └── contratosDocs.yaml
 │   ├── controllers             # Implementação da regra de negócio
 │   │   ├── cartaoController.js
 │   │   ├── clienteController.js
-│   │   ├── contratoController.js 
-│   │   └── index.js 
+│   │   ├── contratoController.js
+│   │   └── index.js
 │   ├── models                  # Definição das tabelas e relacionamentos (Sequelize)
 │   │   ├── cartao.js
 │   │   ├── cliente.js
-│   │   ├── contrato.js 
-│   │   └── index.js 
+│   │   ├── contrato.js
+│   │   └── index.js
 │   ├── routes                  # Definição das rotas e vinculação com o controller
 │   │   ├── cartaoRoutes.js
 │   │   ├── clienteRoutes.js
-│   │   ├── contratoRoutes.js 
-│   │   └── index.js 
+│   │   ├── contratoRoutes.js
+│   │   └── index.js
 │   ├── views                   # Camada de visualização (templates EJS)
 │   │   ├── cartoes             # Páginas relacionadas a cartões
-│   │   │   ├── create.ejs      
-│   │   │   ├── index.ejs       
-│   │   │   ├── read.ejs 
+│   │   │   ├── create.ejs
+│   │   │   ├── index.ejs
+│   │   │   ├── read.ejs
 │   │   │   └── update.ejs
 │   │   ├── clientes            # Páginas relacionadas a clientes
 │   │   │   ├── create.ejs
 │   │   │   ├── index.ejs
-│   │   │   ├── read.ejs 
+│   │   │   ├── read.ejs
 │   │   │   └── update.ejs
 │   │   ├── contratos           # Páginas relacionadas a contratos
 │   │   │   ├── create.ejs
 │   │   │   ├── index.ejs
-│   │   │   ├── read.ejs 
+│   │   │   ├── read.ejs
 │   │   │   └── update.ejs
 │   │   ├── partials            # Fragmentos de telas utilizados nas demais páginas
 │   │   │   └── header.ejs
@@ -149,25 +151,34 @@ erDiagram
 
 ## Instalação e Configuração
 
-1. Instalar o node(v18.19.1), npm(v9.2.0) e o docker:
+### Pré-requisitos
 
-```bash
-    apt install nodejs npm docker.io
-```
+- [NodeJs](https://nodejs.org/en/download/)
+- [NPM](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm)
+- [Docker](https://docs.docker.com/desktop/)
 
-2. Instalar as dependências:
+### Como instalar
+
+1. Instalar as dependências:
 
 ```bash
     npm install
 ```
 
-3. Construir a imagem do docker e iniciar o container:
+2. Construir a imagem do docker:
 
 ```bash
     docker build -t meu-mysql .
-
-    docker run -d --name meu-mysql-container -p 3306:3306 meu-mysql
 ```
+
+3. Iniciar o container docker:
+
+```bash
+    docker run -d --name meu-mysql-container -p 3306:3306 -e MYSQL_ROOT_PASSWORD=RootPassword -e MYSQL_DATABASE=Backoffice -e MYSQL_USER=MainUser -e MYSQL_PASSWORD=MainPassword meu-mysql
+```
+
+> [!NOTE]
+> Lembre-se de alterar os valores das variáveis de ambiente (`-e`) no comando `docker run`
 
 4. Iniciar a aplicação:
 
@@ -188,8 +199,9 @@ http://localhost:3000/api/docs
 ### Cartões (`/api/cartoes`)
 
 - `GET /api/cartoes` – Lista todos os cartões  
-  **Parâmetros opcionais:**  
-  - `active` → filtra cartões ativos ou inativos. Valores possíveis: `"true"`, `"false"`  
+  **Parâmetros opcionais:**
+
+  - `active` → filtra cartões ativos ou inativos. Valores possíveis: `"true"`, `"false"`
   - `details` → inclui detalhes adicionais. Valores possíveis: `"contrato"`, `"cliente"`
 
 - `POST /api/cartoes` – Cadastra um novo cartão  
@@ -200,7 +212,8 @@ http://localhost:3000/api/docs
   **Body:** `id_cartao` (obrigatório) e campos a atualizar (`nome`, `tipo`, `bandeira`, `anuidade`)
 
 - `GET /api/cartoes/{id}` – Busca um cartão pelo ID  
-  **Parâmetros opcionais:**  
+  **Parâmetros opcionais:**
+
   - `details` → inclui detalhes adicionais. Valores possíveis: `"contrato"`, `"cliente"`
 
 - `DELETE /api/cartoes/{id}` – Desativa um cartão e contratos relacionados
@@ -210,9 +223,10 @@ http://localhost:3000/api/docs
 ### Clientes (`/api/clientes`)
 
 - `GET /api/clientes` – Lista todos os clientes  
-  **Parâmetros opcionais:**  
-  - `cpf` → filtra por CPF  
-  - `active` → filtra clientes ativos ou inativos. Valores possíveis: `"true"`, `"false"`  
+  **Parâmetros opcionais:**
+
+  - `cpf` → filtra por CPF
+  - `active` → filtra clientes ativos ou inativos. Valores possíveis: `"true"`, `"false"`
   - `details` → inclui detalhes adicionais. Valores possíveis: `"contrato"`, `"cartao"`
 
 - `POST /api/clientes` – Cadastra um novo cliente  
@@ -223,7 +237,8 @@ http://localhost:3000/api/docs
   **Body:** `id_cliente` (obrigatório) e campos a atualizar (`nome`, `email`, `cpf`, `dt_nascimento`)
 
 - `GET /api/clientes/{id}` – Busca um cliente pelo ID  
-  **Parâmetros opcionais:**  
+  **Parâmetros opcionais:**
+
   - `details` → inclui detalhes adicionais. Valores possíveis: `"contrato"`, `"cartao"`
 
 - `DELETE /api/clientes/{id}` – Desativa um cliente e seus contratos atrelados
@@ -235,8 +250,9 @@ http://localhost:3000/api/docs
 ### Contratos (`/api/contratos`)
 
 - `GET /api/contratos` – Lista todos os contratos  
-  **Parâmetros opcionais:**  
-  - `active` → filtra contratos ativos ou inativos. Valores possíveis: `"true"`, `"false"`  
+  **Parâmetros opcionais:**
+
+  - `active` → filtra contratos ativos ou inativos. Valores possíveis: `"true"`, `"false"`
   - `details` → inclui detalhes adicionais. Valores possíveis: `"cliente"`, `"cartao"`
 
 - `POST /api/contratos` – Cadastra um novo contrato  
@@ -246,7 +262,8 @@ http://localhost:3000/api/docs
   **Body obrigatório:** `id_contrato` e campos a atualizar (`id_cliente`, `id_cartao`)
 
 - `GET /api/contratos/{id}` – Busca um contrato pelo ID  
-  **Parâmetros opcionais:**  
+  **Parâmetros opcionais:**
+
   - `details` → inclui detalhes adicionais. Valores possíveis: `"cliente"`, `"cartao"`
 
 - `DELETE /api/contratos/{id}` – Desativa um contrato

@@ -38,9 +38,9 @@
             };
 
             fetch('/api/cartoes', {
-                    method: 'PATCH',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data),
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
             }).then(async (res) => {
                 if (res.status === 200) {
                     window.location.href = "/cartoes";
@@ -63,7 +63,7 @@
                 <div class="mx-auto max-w-3xl">
                     <h2 class="font-medium text-xl text-gray-500 dark:text-white">Edição de dados do cartão de crédito</h2>
 
-                    <form class="bg-white max-w-2xl rounded-lg shadow-xs outline outline-gray-900/5 sm:rounded-xl md:col-span-2 dark:bg-gray-800/50 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10 mt-3">
+                    <form class="bg-white max-w-2xl rounded-lg shadow-xs outline outline-gray-900/5 sm:rounded-xl md:col-span-2 dark:bg-gray-800/50 dark:shadow-none dark:-outline-offset-1 dark:outline-white/10 mt-6">
                         <!-- Form fields -->
                         <div class="px-4 py-6 sm:p-8">
                             <!-- Nome-->

@@ -148,7 +148,7 @@ class ContratoController {
         const contrato = await this.Contrato.findByPk(id_contrato);
 
         if (!contrato) this.#throwError(404, 'Contrato não encontrado');
-        if (!contrato.contrato_ativo) this.#throwError(400, 'O cartão já estava desativado, nenhuma modificação foi realizada');
+        if (!contrato.contrato_ativo) this.#throwError(400, 'O contrato já estava desativado, nenhuma modificação foi realizada');
         
         const today = this.#getToday();
         

@@ -30,9 +30,7 @@
 
 # Adicional
 
-- [ ] Botão de adicionar cartão a partir da view de read clientes
-
-- [ ] Botão de adicionar cliente a partir da view de read cartões
+- [x] Botão de adicionar contratos a partir da view de read clientes e cartões
 
 - [ ] Adicionar [Breadbrumbs](https://tailwindcss.com/plus/ui-blocks/application-ui/navigation/breadcrumbs#component-09fbe246cb968a4ab03a97c5da4947ee)
 

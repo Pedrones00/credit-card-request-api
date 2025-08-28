@@ -18,7 +18,7 @@ app.set("views", path.join(__dirname, "views"));
 app.set("view engine", "ejs");
 
 routes(app).then(() => {
-  app.listen(process.env.PORT, () => {
-    console.log(`Server running in http://localhost:${process.env.PORT}`);
+  app.listen(process.env.NODE_PORT, () => {
+    console.log(`Server running in http://localhost:${process.env.NODE_PORT}`);
   })
 });

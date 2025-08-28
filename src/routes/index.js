@@ -46,12 +46,14 @@ const routes = async (app) => {
     }
 
     const routeNotFound = (request, response) => response.status(404).render("404", { titulo: "Página não encontrada" });
+    const routeAPINotFound = (request, response) => response.status(404).json({error: "Endpoint inexistente, para mais informações acesso o /api/docs"});
 
     app.use(indexRoute());
     app.use(docsRoutes());
     app.use(clienteRoute(clienteController));
     app.use(cartaoRoute(cartaoController));
     app.use(contratoRoute(contratoController));
+    app.use(routeAPINotFound);
     app.use(routeNotFound);
 }
 

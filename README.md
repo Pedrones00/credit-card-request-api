@@ -1,5 +1,7 @@
 # Tech Challenge
 
+!["Captura de tela exibindo a página de visualização de dados de cliente."](/public/mockup.png)
+
 Este Tech Challenge teve como objetivo desenvolver um sistema para gerenciamento de cartões, clientes e contratos. A aplicação inclui uma API REST e uma interface gráfica, permitindo que administradores acessem e gerenciem o sistema de forma prática.
 
 ## Sumário
@@ -174,7 +176,7 @@ erDiagram
 3. Iniciar o container docker:
 
 ```bash
-    docker run -d --name meu-mysql-container -p 3306:3306 -e MYSQL_ROOT_PASSWORD=RootPassword -e MYSQL_DATABASE=Backoffice -e MYSQL_USER=MainUser -e MYSQL_PASSWORD=MainPassword meu-mysql
+    docker run -d --name meu-container -p 3306:3306 -e MYSQL_ROOT_PASSWORD=SenhaRoot -e MYSQL_DATABASE=BancoDeDados -e MYSQL_USER=Usuario -e MYSQL_PASSWORD=Senha mysql
 ```
 
 > [!NOTE]
